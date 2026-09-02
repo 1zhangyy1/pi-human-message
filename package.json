@@ -1,0 +1,82 @@
+{
+  "name": "pi-human-message",
+  "version": "0.1.0",
+  "description": "Agent-authored, human-shaped chat messages for embedded Pi agents",
+  "type": "module",
+  "sideEffects": false,
+  "license": "MIT",
+  "author": "pi-human-message contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1zhangyy1/pi-human-message.git"
+  },
+  "homepage": "https://github.com/1zhangyy1/pi-human-message#readme",
+  "bugs": {
+    "url": "https://github.com/1zhangyy1/pi-human-message/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "pi",
+    "pi-agent",
+    "pi-extension",
+    "agent",
+    "chat",
+    "messaging"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "docs"
+  ],
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./evaluation": {
+      "types": "./dist/evaluation.d.ts",
+      "import": "./dist/evaluation.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm pack:check",
+    "eval": "tsx scripts/eval.ts",
+    "example": "tsx examples/openrouter-agent.ts",
+    "pack:check": "npm pack --dry-run",
+    "prepare": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm check",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@earendil-works/pi-agent-core": "0.84.4",
+    "@earendil-works/pi-ai": "0.84.4",
+    "@earendil-works/pi-coding-agent": "0.84.4",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.22.3",
+    "typescript": "^5.9.0"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

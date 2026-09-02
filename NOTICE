@@ -1,0 +1,13 @@
+pi-human-message is an independent community project and is not affiliated
+with xAI, Telegram, or the Pi maintainers.
+
+The evaluation-only reference prompts in scripts/prompt-variants.ts adapt ideas
+from these MIT-licensed projects:
+
+- Grok Telegram Bot contributors, grok-telegram-bot
+  https://github.com/artickc/grok-telegram-bot
+- Jack, learn-grok-bot
+  https://github.com/yuanyijie/learn-grok-bot
+
+Those reference prompts are used only as reproducible comparison baselines.
+They are not claimed to be xAI's private production prompts.
