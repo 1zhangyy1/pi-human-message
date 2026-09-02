@@ -1,76 +1,48 @@
-# 拟人发消息 / Human Message
+<div align="center">
 
-**A real Pi extension that lets the Agent decide when one thought deserves one chat bubble.**
+# Human Message · 拟人发消息
+
+**One thought, one bubble.**<br>
+**一个想法，一个气泡。**
+
+A Pi extension for agent-authored, human-shaped chat messages.<br>
+让 Pi Agent 自己决定一条还是多条，让每条消息都像是认真发出来的。
 
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message)](https://github.com/1zhangyy1/pi-human-message/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-202124.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
+[![Pi package](https://img.shields.io/badge/Pi-package-b9a9ff)](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-c9f5be)](LICENSE)
 
-让 Pi Agent 自己判断这次回复应该是一条还是几条消息。它不按标点机械拆句，不用延迟伪装人类打字，也不在模型不知情时二次切割已完成的回答。
+<br>
 
-## 先看真实效果
+<a href="https://github.com/1zhangyy1/pi-human-message/blob/main/demo/index.html">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-demo.gif" width="920" alt="Human Message animated bilingual chat demonstration">
+</a>
 
-2026-09-02 的真实冒烟测试：Pi CLI `0.84.4` 加载本扩展，GPT-5.6 Luna 通过本地 Webhook 实际投递。下面三条未经手工改写。
+<sub>Animated with real HTML and CSS · 由真实 HTML / CSS 驱动的消息动画</sub>
 
-**User**
+</div>
 
-> 请像聊天一样分三条告诉我：你理解了什么、一个风险、再问我一个问题。主题是把这个 Pi 插件开源。
+## Why / 为什么
 
-**Agent 真正发出的 3 个气泡**
+Most chat agents either send one report-shaped wall of text or split finished prose mechanically. Human Message gives the Agent one route-bound `send_message` tool and lets it choose a few complete conversational beats while it is answering.
 
-> 🟣 我理解的是：你想把当前这个 Pi 插件整理成一个适合公开发布的开源项目，包括代码、文档、许可证，以及必要的配置和示例。
+大多数聊天 Agent 要么一次发出一整面报告，要么把写完的内容机械切段。Human Message 给 Agent 一个绑定当前会话的 `send_message` 工具，让它在回答时自己判断哪些内容值得成为独立消息。
 
-> 🟣 一个风险是：插件里可能还包含个人路径、密钥、聊天记录或其他环境相关信息；如果直接发布，容易造成隐私泄露或让别人无法复现。
+- Short answers stay in one bubble. / 短回答保持一条。
+- Separate ideas may become two or three bubbles. / 独立语义可以自然分成两三条。
+- No punctuation or character-count splitting. / 不按标点或字数切割。
+- No fake typing delay or fake emotion. / 不伪装真人打字，也不制造虚假情绪。
 
-> 🟣 你希望开源到哪个平台，以及倾向使用什么许可证（例如 MIT、Apache-2.0 或 GPL）？
-
-这不是 token streaming；是 Agent 在生成时主动调用了三次 `send_message`，每次都是一个完整语义单元。这里的“用户可见”指目标聊天渠道；Pi 终端仍是操作者界面。更多真实样例见 [Showcase](docs/SHOWCASE.md)。
-
-## 它到底是什么
-
-**是 Pi 插件。** 更准确地说，这是一个符合 Pi package 规范的包，里面有一个默认导出的 Pi Extension。
-
-- `package.json` 通过 `pi.extensions` 声明可发现入口。
-- [`extensions/index.ts`](extensions/index.ts) 是 `pi install` 加载的默认扩展。
-- [`createHumanMessageExtension()`](src/pi-extension.ts) 是给产品 SDK 宿主使用的同一个 `ExtensionFactory`。
-- 两种入口共用同一套 prompt、tool、消息上限和投递协议。
-
-**但它不是通道 SDK。** Telegram、微信、飞书或 Slack 仍由应用负责登录、路由、限流、格式和重试。本插件只决定“说什么、用几条说”，再把文本交给已绑定当前会话的发送端口。
-
-## 怎么工作
-
-```text
-用户消息
-   ↓
-Pi Agent + Human Message 行为契约
-   ↓  Agent 先规划 1–4 个完整语义块
-send_message({ text })
-   ↓  模型看不到 channel / recipient / chat_id
-宿主绑定的发送端口
-   ├─ Telegram
-   ├─ 微信
-   ├─ 飞书 / Slack
-   └─ 任意 IM
-```
-
-默认行为：
-
-- 普通短答优先一条。
-- 只有真正存在独立对话节拍时才发两到三条。
-- 详细回答先按语义组织，不在生成后按字数切片。
-- 每轮硬上限四条，单条默认软上限约 700 字符。
-- 工具成功、失败和不确定结果都必须如实收尾。
-- 产品宿主可在 Agent 忘记投递时执行最多一次恢复。
-
-详细设计见 [Architecture](docs/ARCHITECTURE.md)。
-
-## 方式一：作为 Pi package 安装
+## Install / 安装
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.2.0
+pi install git:github.com/1zhangyy1/pi-human-message@v0.2.1
 ```
 
-安装入口使用一个通用、已绑定路由的 Webhook：
+Bind the extension to a delivery endpoint owned by your application. The model never sees or chooses a channel, recipient, or chat id.
+
+把插件连接到产品自己管理的投递端点。模型看不到、也不能选择渠道、收件人或 `chat_id`。
 
 ```bash
 export PI_HUMAN_MESSAGE_WEBHOOK_URL="https://your-host.example/deliver/current-conversation"
@@ -78,163 +50,125 @@ export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="your-secret"
 pi
 ```
 
-在 Pi 内输入 `/human-message` 可查看 active/inactive 状态。未配置 Webhook 时扩展保持 inactive，不会注册一个永远失败的工具。
+Run `/human-message` inside Pi to check whether delivery is active. Without a valid endpoint, the extension stays safely inactive.
 
-Webhook 接收：
+在 Pi 中运行 `/human-message` 可以检查连接状态；没有有效端点时，插件会安全地保持未启用。
 
-```json
-{
-  "version": "pi-human-message.delivery.v1",
-  "toolCallId": "tool-call-id",
-  "text": "one complete chat bubble"
-}
-```
+## How it works / 如何工作
 
-并返回投递回执：
+| 1 · Shape / 组织 | 2 · Send / 发送 | 3 · Deliver / 投递 |
+| --- | --- | --- |
+| The Agent plans 1–4 complete conversational beats.<br>Agent 规划 1–4 个完整语义块。 | Each `send_message` call creates one bubble.<br>每次工具调用对应一个气泡。 | The host sends it to the already-bound conversation.<br>宿主投递到已经绑定的会话。 |
 
-```json
-{
-  "messageId": "host-stable-id",
-  "externalMessageIds": ["telegram-message-id"],
-  "idempotentReplay": false
-}
-```
+The boundary is intentionally small:
 
-`toolCallId` 同时作为 `Idempotency-Key` header。远程端点必须使用 HTTPS，只有 localhost 可使用 HTTP。
+| Agent decides / Agent 决定 | Host enforces / 宿主保证 |
+| --- | --- |
+| Message count, grouping, tone<br>消息数量、语义分组和语气 | Authenticated destination and tenant<br>已验证的收件人和租户 |
+| Whether an acknowledgement helps<br>是否需要一句简短确认 | Idempotency, retries, rate limits<br>幂等、重试和限流 |
+| How to report confirmed tool results<br>如何表达已经确认的结果 | Channel formatting and hard limits<br>平台格式和硬性长度限制 |
 
-## 两分钟本地体验
+Telegram, WeChat, Feishu, and Slack adapters stay in the product host. This package only owns message expression, so channel implementations remain clean and independent.
 
-第一个终端：
+Telegram、微信、飞书和 Slack 的适配继续留在产品宿主。本插件只处理消息表达，因此各渠道可以保持干净、互不影响。
 
-```bash
-git clone https://github.com/1zhangyy1/pi-human-message.git
-cd pi-human-message
-corepack enable
-pnpm install
-export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="local-demo"
-pnpm example:webhook
-```
+Read the full [architecture](docs/ARCHITECTURE.md).
 
-第二个终端，使用你已配置好模型的 Pi：
+## Embed it / 嵌入产品
 
-```bash
-export PI_HUMAN_MESSAGE_WEBHOOK_URL="http://127.0.0.1:8789/deliver"
-export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="local-demo"
-pnpm exec pi -e ./extensions/index.ts "请分三条告诉我：你理解了什么、一个风险、再问我一个问题。"
-```
+Long-running IM services can inject a JavaScript delivery port directly instead of using the generic Webhook.
 
-第一个终端会显示 Agent 真正投递的独立气泡。它用 `toolCallId` 演示最小幂等处理，但数据只存在内存；这个 demo server 只用于本地观察，不是生产消息队列。
-
-## 方式二：嵌入你的 Pi 产品
-
-对 Telegram、微信、飞书等长驻服务，直接注入 JS 发送端口，不必绕 Webhook：
-
-```bash
-pnpm add https://github.com/1zhangyy1/pi-human-message/releases/download/v0.2.0/pi-human-message-0.2.0.tgz
-```
+常驻的 IM 服务可以直接注入 JavaScript 投递端口，不需要绕一层通用 Webhook。
 
 ```ts
-import { DefaultResourceLoader } from "@earendil-works/pi-coding-agent";
 import { createHumanMessageExtension } from "pi-human-message";
 
 const humanMessage = createHumanMessageExtension({
   send: async ({ toolCallId, text }) => {
-    const sent = await telegram.sendMessage(boundChatId, text);
+    const sent = await channel.send(boundConversationId, text);
     return {
       messageId: toolCallId,
-      externalMessageIds: [String(sent.message_id)],
+      externalMessageIds: [String(sent.id)],
       idempotentReplay: false,
     };
   },
 });
-
-const resourceLoader = new DefaultResourceLoader({
-  extensionFactories: [{ name: "human-message", factory: humanMessage }],
-});
-await resourceLoader.reload();
 ```
 
-`boundChatId` 必须来自已验证的入站会话，绝不能让模型提供。完整 Agent-core 示例见 [`examples/openrouter-agent.ts`](examples/openrouter-agent.ts)。
+`boundConversationId` must come from trusted inbound context, never from model output. See the runnable [Agent-core example](examples/openrouter-agent.ts) and the [Webhook contract](docs/ARCHITECTURE.md#delivery-protocol).
 
-## 仓库设计
+`boundConversationId` 必须来自可信的入站会话，绝不能由模型提供。完整代码见 [Agent-core 示例](examples/openrouter-agent.ts) 和 [Webhook 协议](docs/ARCHITECTURE.md#delivery-protocol)。
+
+## Real behavior / 真实表现
+
+The animation above is an explanatory UI simulation. The following behaviors come from unedited real-model runs:
+
+上面的动画用于解释交互；下面的表现来自未经手工改写的真实模型运行：
+
+| Prompt / 用户消息 | Delivered behavior / 实际表现 |
+| --- | --- |
+| `在吗` | One concise bubble: `在呢，有什么事？`<br>只发一条简短回复。 |
+| Correct me, then ask a separate question.<br>先纠正我，再单独问一个问题。 | Two complete bubbles with distinct purposes.<br>两个目的清晰的完整气泡。 |
+| Split “we start testing tomorrow” into ten fragments.<br>把“明天开始测试”拆成十条。 | One complete sentence; no artificial spam.<br>仍然只发一个完整句子，不制造碎片。 |
+| A tool fails while saving a reminder.<br>保存提醒的工具失败。 | Reports the failure truthfully; never claims success.<br>如实说明失败，不伪造成功。 |
+
+See the full, unedited [message showcase](docs/SHOWCASE.md).
+
+## Proof / 验证
+
+| Check / 检查 | Result / 结果 |
+| --- | ---: |
+| GPT-5.6 Luna real-model turns / 真实模型回合 | 54 / 54 |
+| Gemini 3.7 Flash real-model turns / 真实模型回合 | 27 / 27 |
+| Deterministic tests / 确定性测试 | 20 / 20 |
+| Real Pi CLI → authenticated local Webhook / 真实 Pi 投递 | Passed / 通过 |
+| Clean remote-tag installation / 远端 Tag 干净安装 | Passed / 通过 |
+
+The snapshot is reproducible evidence, not a guarantee for every future model or channel. Production Telegram, WeChat, Feishu, and Slack account loops must still be tested by their host applications.
+
+这些数据是可复现证据，不代表所有未来模型和渠道都必然通过。Telegram、微信、飞书和 Slack 的真实生产账号闭环仍需由对应宿主验证。
+
+Read the [evaluation method and limits](docs/EVALUATION.md).
+
+## Repository / 仓库
 
 ```text
-extensions/index.ts      Pi package 可发现入口，只处理配置和组装
-src/prompt.ts            对话形状与真实性契约
-src/tool.ts              send_message 工具和每轮硬上限
-src/pi-extension.ts      标准 Pi ExtensionFactory
-src/webhook.ts           可安装 package 的通用发送端口
-src/recovery.ts          宿主可选的一次恢复检测
-src/evaluation.ts        评测子路径，不混入默认运行 API
-evals/                   27 个真实模型行为场景
-test/                    确定性边界和 package 发现测试
+extensions/index.ts   installable Pi entry / Pi 可安装入口
+src/prompt.ts         behavior contract / 行为契约
+src/tool.ts           send_message + hard limits / 工具与硬上限
+src/pi-extension.ts   shared ExtensionFactory / 共用扩展工厂
+src/webhook.ts        route-bound delivery / 会话绑定投递
+src/recovery.ts       one-shot recovery helpers / 单次恢复辅助
+demo/index.html       dependency-free visual demo / 零依赖视觉演示
+evals/ + test/        model scenarios + deterministic gates / 评测与测试
 ```
 
-依赖只能向内：入口和端口依赖行为内核，行为内核不知道 Telegram、微信或任何产品业务。
+No channel framework, UI framework, database, or hidden service is bundled. Runtime behavior depends only on Pi peer packages; evaluation code is isolated behind the `pi-human-message/evaluation` export.
 
-## 谁决定什么
+仓库不捆绑渠道框架、前端框架、数据库或隐藏服务。运行时只依赖 Pi peer packages；评测代码通过独立的 `pi-human-message/evaluation` 子路径隔离。
 
-| Agent 决定 | 宿主强制 |
-| --- | --- |
-| 一条还是多条 | 最多 1–8 条，默认 4 |
-| 语义分组和语气 | 单条平台硬上限 |
-| 是否需要短确认 | 已验证的当前收件人 |
-| 如何报告工具结果 | 授权、幂等、限流和重试 |
-
-这就是为什么仓库里没有一堆 channel adapter：消息表达判断应该共享，平台运营细节应该彼此隔离。
-
-## 验证状态
-
-- GPT-5.6 Luna：54/54 个独立回合通过，52/54 直接投递，2 个经一次恢复投递。
-- Gemini 3.7 Flash：27/27 通过，全部直接投递。
-- 合计真实模型回合：81/81 在发布门槛内通过。
-- 确定性测试：20 个，覆盖 prompt、tool、恢复、Webhook、package manifest 和安全失败。
-- 真实 Pi CLI 扩展冒烟：已加载 `extensions/index.ts` 并向本地 Webhook 投递 3 条气泡。
-
-这些数字是可复现快照，不是对任意未来模型的保证。场景、命令和局限见 [Evaluation](docs/EVALUATION.md)。
-
-## 公共 API
-
-- `createHumanMessageExtension(options)`
-- `createHumanMessageSystemPrompt(options)`
-- `withHumanMessageTurnReminder(text)`
-- `createSendMessageAgentTool(send, options)`
-- `createTurnBoundSendMessagePort(send, options)`
-- `createWebhookSendMessagePort(options)`
-- `inspectHumanMessageDelivery(trace)`
-- `createHumanMessageRecoveryPrompt(state)`
-- `pi-human-message/evaluation` 评测子路径
-
-## 明确的局限
-
-- 当前只投递文本，不处理图片、文件、reaction 或 typing indicator。
-- 不提供 Telegram/微信/飞书 SDK，不管理登录和入站 webhook。
-- 可安装的 Webhook 入口不会自动运行恢复 Agent；需要可持久轮次 ID 的产品宿主应使用 recovery API 执行最多一次恢复。
-- Prompt 是行为引导，不是权限或租户隔离边界。
-- 本轮验证了库、Pi package、本地 Webhook 和真实模型，没有把本地 demo 当作真实 Telegram/微信/飞书生产闭环。
-
-安全边界见 [SECURITY.md](SECURITY.md)。
-
-## 开发
+## Develop / 开发
 
 ```bash
 pnpm install
 pnpm check
 ```
 
-真实模型评测是 opt-in 且会产生费用：
+Open [`demo/index.html`](demo/index.html) to replay the visual demo. Paid real-model evaluation is opt-in:
+
+打开 [`demo/index.html`](demo/index.html) 可以重播视觉演示。真实模型评测需要主动提供自己的密钥，并会产生费用：
 
 ```bash
-export OPENROUTER_API_KEY="..."
-EVAL_REPEATS=2 pnpm eval
+OPENROUTER_API_KEY="..." EVAL_REPEATS=2 pnpm eval
 ```
 
-CI 不使用密钥，只运行类型检查、确定性测试、构建和 package 审计。行为改动请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+Please read [CONTRIBUTING](CONTRIBUTING.md), [SECURITY](SECURITY.md), and [NOTICE](NOTICE) before contributing or deploying.
 
-## 来源与许可
+参与贡献或部署前，请阅读 [贡献指南](CONTRIBUTING.md)、[安全边界](SECURITY.md) 和 [来源说明](NOTICE)。
 
-设计复用了 Pi 的 ExtensionFactory、工具注册和每轮 system prompt 机制。可安装 package 的结构遵循 Pi 官方 [packages](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md) 和 [extensions](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md) 规范。
+<div align="center">
 
-评测中的对照 prompt 参考了 MIT 许可的 [`artickc/grok-telegram-bot`](https://github.com/artickc/grok-telegram-bot) 和 [`yuanyijie/learn-grok-bot`](https://github.com/yuanyijie/learn-grok-bot)。本项目不隶属于 xAI、Telegram 或 Pi 维护者，也不声称拥有 xAI 的私有生产 prompt。详见 [NOTICE](NOTICE)。
+MIT licensed · Built for the Pi ecosystem<br>
+MIT 许可 · 为 Pi 生态而做
 
-MIT licensed.
+</div>

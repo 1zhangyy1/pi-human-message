@@ -2,6 +2,14 @@
 
 All notable changes are documented here. The project follows semantic versioning after the initial `0.1.0` release.
 
+## 0.2.1 - 2026-09-03
+
+- Redesign the project homepage as a concise, balanced English/Chinese README.
+- Add a dependency-free, accessible HTML chat animation and generated README preview.
+- Add a Pi package-gallery cover image.
+- Clarify which examples are UI simulations and which are unedited real-model evidence.
+- Audit the source with strict unused-symbol checks and keep channel-specific code out of the package.
+
 ## 0.2.0 - 2026-09-02
 
 - Turn the repository into a discoverable Pi package with a default Extension entry.

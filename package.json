@@ -1,6 +1,6 @@
 {
   "name": "pi-human-message",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A Pi extension for agent-authored, human-shaped chat messages",
   "type": "module",
   "sideEffects": false,
@@ -45,7 +45,8 @@
   "pi": {
     "extensions": [
       "./extensions/index.ts"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-cover.png"
   },
   "exports": {
     ".": {

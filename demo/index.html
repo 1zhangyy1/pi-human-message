@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Human Message — one thought, one bubble</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #202323;
+        background: #242727;
+        font-synthesis: none;
+        --ink: #202323;
+        --muted: #747979;
+        --line: #dfe2e2;
+        --surface: #ffffff;
+        --soft: #f3f5f5;
+        --blue: #0a84ff;
+        --lavender: #b9a9ff;
+        --mint: #c9f5be;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        padding: clamp(20px, 4vw, 56px);
+        display: grid;
+        place-items: center;
+        background: #242727;
+      }
+
+      button, a { font: inherit; }
+
+      .site-shell {
+        width: min(1440px, 100%);
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid #171919;
+        box-shadow: 18px 18px 0 #171919;
+      }
+
+      .topbar {
+        min-height: 76px;
+        padding: 0 clamp(24px, 4vw, 64px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--ink);
+        font-weight: 720;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-mark {
+        width: 31px;
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        border: 1.5px solid var(--ink);
+        border-radius: 10px;
+        background: var(--lavender);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 12px;
+      }
+
+      .topbar nav {
+        display: flex;
+        align-items: center;
+        gap: clamp(18px, 3vw, 42px);
+      }
+
+      .topbar a {
+        color: #5d6262;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .topbar a:hover { color: var(--ink); }
+
+      .status {
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      main {
+        height: calc(100% - 76px);
+        padding: clamp(28px, 3vw, 44px) clamp(24px, 6vw, 88px);
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(480px, 1.08fr);
+        gap: clamp(48px, 8vw, 120px);
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0 0 24px;
+        color: #555b5b;
+        font-size: 13px;
+        font-weight: 680;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        background: var(--mint);
+        border: 1px solid var(--ink);
+      }
+
+      h1 {
+        max-width: 640px;
+        margin: 0;
+        font-size: clamp(54px, 5.6vw, 84px);
+        font-weight: 520;
+        letter-spacing: -0.065em;
+        line-height: 0.97;
+      }
+
+      .zh-title {
+        display: block;
+        margin-top: 22px;
+        font-size: 0.46em;
+        font-weight: 540;
+        letter-spacing: -0.04em;
+        line-height: 1.15;
+      }
+
+      .lead {
+        max-width: 560px;
+        margin: 24px 0 0;
+        color: var(--muted);
+        font-size: clamp(16px, 1.45vw, 20px);
+        line-height: 1.65;
+      }
+
+      .lead span { color: #4d5252; }
+
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .fact {
+        padding: 10px 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        color: #515656;
+        font-size: 13px;
+      }
+
+      .fact:nth-child(2) { background: var(--mint); border-color: #abd9a0; }
+      .fact:nth-child(3) { background: #eeeaff; border-color: #d7d0ff; }
+
+      .demo-column {
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+      }
+
+      .chat-window {
+        width: min(100%, 590px);
+        min-height: 490px;
+        overflow: hidden;
+        border: 1.5px solid var(--ink);
+        border-radius: 24px;
+        background: #f7f7f9;
+        box-shadow: 13px 13px 0 var(--ink);
+      }
+
+      .chat-header {
+        min-height: 80px;
+        padding: 16px 20px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom: 1px solid #e3e3e6;
+      }
+
+      .back-label { color: var(--blue); font-size: 14px; }
+      .chat-person { text-align: center; }
+      .chat-person strong { display: block; font-size: 14px; }
+      .chat-person span { color: #8a8d92; font-size: 11px; }
+      .secure { justify-self: end; color: #8a8d92; font-size: 12px; }
+
+      .messages {
+        min-height: 410px;
+        padding: 24px 20px 28px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .message {
+        max-width: 82%;
+        border-radius: 20px;
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+      }
+
+      .message {
+        padding: 12px 15px;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      .message .translation {
+        display: block;
+        margin-top: 4px;
+        opacity: 0.74;
+        font-size: 12px;
+      }
+
+      .message.user {
+        align-self: flex-end;
+        color: #fff;
+        background: var(--blue);
+        border-bottom-right-radius: 6px;
+        animation: bubble-in 420ms cubic-bezier(.22, .8, .28, 1) 180ms forwards;
+      }
+
+      .message.agent {
+        align-self: flex-start;
+        color: #252729;
+        background: #e7e7eb;
+        border-bottom-left-radius: 6px;
+      }
+
+      .message.agent.one { animation: bubble-in 420ms cubic-bezier(.22, .8, .28, 1) 900ms forwards; }
+      .message.agent.two { animation: bubble-in 420ms cubic-bezier(.22, .8, .28, 1) 1.75s forwards; }
+      .message.agent.three { animation: bubble-in 420ms cubic-bezier(.22, .8, .28, 1) 2.6s forwards; }
+
+      .replay {
+        min-width: 138px;
+        padding: 12px 18px;
+        border: 1.5px solid var(--ink);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--ink);
+        box-shadow: 4px 4px 0 var(--ink);
+        cursor: pointer;
+        font-weight: 680;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .replay:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+      .replay:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+      .chat-window.restarting .message { animation: none !important; }
+
+      @keyframes bubble-in {
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      @media (max-width: 1040px) {
+        .site-shell { box-shadow: 10px 10px 0 #171919; }
+        .site-shell { aspect-ratio: auto; }
+        main { height: auto; grid-template-columns: 1fr; }
+        .copy { text-align: center; }
+        .eyebrow, .facts { justify-content: center; }
+        h1, .lead { margin-left: auto; margin-right: auto; }
+        .chat-window { min-height: 560px; }
+      }
+
+      @media (max-width: 640px) {
+        body { padding: 0; background: #fff; }
+        .site-shell { min-height: 100vh; border: 0; box-shadow: none; }
+        .topbar { min-height: 64px; }
+        .topbar nav a { display: none; }
+        .status { padding: 9px 11px; }
+        main { padding-top: 54px; gap: 44px; }
+        h1 { font-size: clamp(48px, 14vw, 68px); }
+        .chat-window { min-height: 520px; border-radius: 20px; box-shadow: 8px 8px 0 var(--ink); }
+        .messages { min-height: 440px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; }
+        .message { opacity: 1; transform: none; animation: none !important; }
+        .replay { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="https://github.com/1zhangyy1/pi-human-message" aria-label="Human Message on GitHub">
+          <span class="brand-mark" aria-hidden="true">HM</span>
+          <span>Human Message</span>
+        </a>
+        <nav aria-label="Project links">
+          <a href="../README.md">Readme</a>
+          <a href="../docs/ARCHITECTURE.md">Architecture</a>
+          <span class="status">Pi Extension</span>
+        </nav>
+      </header>
+
+      <main>
+        <section class="copy" aria-labelledby="hero-title">
+          <p class="eyebrow">One thought, one bubble</p>
+          <h1 id="hero-title">
+            Make agents feel native to chat.
+            <span class="zh-title" lang="zh-CN">让 Agent 真正在聊天。</span>
+          </h1>
+          <p class="lead">
+            The Agent chooses a few complete conversational beats and sends each one as a real message.
+            <span lang="zh-CN">Agent 自己判断一条还是多条，每条都是完整、有意义的消息。</span>
+          </p>
+          <ul class="facts" aria-label="Project principles">
+            <li class="fact">No punctuation splitting</li>
+            <li class="fact">1 tool call = 1 bubble</li>
+            <li class="fact">Channel-neutral</li>
+          </ul>
+        </section>
+
+        <section class="demo-column" aria-label="Animated chat demonstration">
+          <div class="chat-window" id="chat-window">
+            <header class="chat-header">
+              <span class="back-label">Messages</span>
+              <div class="chat-person">
+                <strong>Human Message</strong>
+                <span>Agent online</span>
+              </div>
+              <span class="secure">Delivered</span>
+            </header>
+
+            <div class="messages" role="log" aria-live="polite" aria-label="Example conversation">
+              <div class="message user">
+                What does this Pi extension actually do?
+                <span class="translation" lang="zh-CN">这个 Pi 插件到底做什么？</span>
+              </div>
+
+              <div class="message agent one" aria-hidden="true">
+                It lets the Agent choose how many complete messages a reply needs.
+                <span class="translation" lang="zh-CN">它让 Agent 自己判断一次回复该用几条完整消息。</span>
+              </div>
+
+              <div class="message agent two" aria-hidden="true">
+                Every send_message call becomes one real chat bubble.
+                <span class="translation" lang="zh-CN">每次 send_message 调用，都会变成一个真实气泡。</span>
+              </div>
+
+              <div class="message agent three" aria-hidden="true">
+                Short answers stay short. Complex answers get room to breathe.
+                <span class="translation" lang="zh-CN">短回答保持简短，复杂回答自然分成几步。</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="replay" id="replay" type="button">Replay · 再看一次</button>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const chatWindow = document.querySelector("#chat-window");
+      const replay = document.querySelector("#replay");
+      const agentMessages = [...document.querySelectorAll(".message.agent")];
+      const revealDelays = [900, 1750, 2600];
+      let announcementTimers = [];
+
+      function scheduleAnnouncements() {
+        announcementTimers.forEach(clearTimeout);
+        announcementTimers = [];
+
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          agentMessages.forEach((message) => message.removeAttribute("aria-hidden"));
+          return;
+        }
+
+        agentMessages.forEach((message, index) => {
+          message.setAttribute("aria-hidden", "true");
+          announcementTimers.push(setTimeout(() => {
+            message.removeAttribute("aria-hidden");
+          }, revealDelays[index]));
+        });
+      }
+
+      replay.addEventListener("click", () => {
+        chatWindow.classList.add("restarting");
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            chatWindow.classList.remove("restarting");
+            scheduleAnnouncements();
+          });
+        });
+      });
+
+      scheduleAnnouncements();
+    </script>
+  </body>
+</html>
