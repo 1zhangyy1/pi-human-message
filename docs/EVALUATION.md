@@ -14,6 +14,8 @@ Run on 2026-09-02 with Pi packages `0.84.4`, the default prompt, adaptive acknow
 
 The two recovered Luna runs were ordinary text turns where the model initially left its answer in private assistant prose. The host's single recovery pass delivered the answer. No scenario needed a second recovery.
 
+The `0.2.0` package shape was also smoke-tested through the real Pi CLI: Pi loaded `extensions/index.ts`, GPT-5.6 Luna called `send_message` three times, and a local authenticated Webhook received three distinct delivery payloads. Pi emitted no duplicate final prose. This proves the Pi Extension-to-Webhook path, not a production Telegram/WeChat/Feishu account loop.
+
 Before the final prompt and reminder changes, the same Luna suite passed 49/54 runs, directly delivered 48/54, and produced a longest bubble above 1,100 characters. The failures concentrated in detailed answers and noticeable tool-work summaries; that evidence drove the soft bubble budget, stronger evidence grounding, and end-of-turn reminder.
 
 ## What the 27 scenarios cover
@@ -64,6 +66,8 @@ Useful environment variables:
 - `HUMAN_MESSAGE_PROMPT_VARIANT`: `ours`, `grokbot-telegram`, or `grokbot-product` for the attributed comparison baselines.
 
 Never commit evaluation credentials or raw private-user transcripts.
+
+Deterministic release checks contain 20 tests covering prompt options, semantic delivery guards, recovery inspection, package discovery, inactive/active extension states, Webhook authentication and receipts, and fail-closed endpoint handling.
 
 ## Interpreting the number
 

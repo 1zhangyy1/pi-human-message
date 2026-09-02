@@ -16,13 +16,15 @@ import {
   createHumanMessageRecoveryPrompt,
   createSendMessageAgentTool,
   createTurnBoundSendMessagePort,
-  evaluateHumanMessages,
   inspectHumanMessageDelivery,
   withHumanMessageTurnReminder,
   type HumanMessageAcknowledgement,
-  type HumanMessageBehaviorScenario,
   type HumanMessageTraceEvent,
 } from "../src/index.js";
+import {
+  evaluateHumanMessages,
+  type HumanMessageBehaviorScenario,
+} from "../src/evaluation.js";
 import { parsePromptVariant, promptForVariant } from "./prompt-variants.js";
 
 const provider = process.env.PI_PROVIDER?.trim() || "openrouter";

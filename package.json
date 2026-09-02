@@ -1,7 +1,7 @@
 {
   "name": "pi-human-message",
-  "version": "0.1.0",
-  "description": "Agent-authored, human-shaped chat messages for embedded Pi agents",
+  "version": "0.2.0",
+  "description": "A Pi extension for agent-authored, human-shaped chat messages",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -20,6 +20,7 @@
   },
   "keywords": [
     "pi",
+    "pi-package",
     "pi-agent",
     "pi-extension",
     "agent",
@@ -31,6 +32,8 @@
   },
   "files": [
     "dist",
+    "extensions",
+    "src",
     "README.md",
     "LICENSE",
     "NOTICE",
@@ -39,6 +42,11 @@
     "docs"
   ],
   "types": "./dist/index.d.ts",
+  "pi": {
+    "extensions": [
+      "./extensions/index.ts"
+    ]
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -54,8 +62,9 @@
     "check": "pnpm typecheck && pnpm test && pnpm build && pnpm pack:check",
     "eval": "tsx scripts/eval.ts",
     "example": "tsx examples/openrouter-agent.ts",
+    "example:webhook": "tsx examples/webhook-server.ts",
     "pack:check": "npm pack --dry-run",
-    "prepare": "tsc -p tsconfig.build.json",
+    "prepack": "pnpm build",
     "prepublishOnly": "pnpm check",
     "test": "node --import tsx --test \"test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit"

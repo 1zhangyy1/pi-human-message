@@ -23,6 +23,8 @@ The host application must enforce:
 
 The model receives only message text for `send_message`; it must never be allowed to choose the recipient from untrusted prompt content.
 
+The installable extension accepts its route-bound destination only from `PI_HUMAN_MESSAGE_WEBHOOK_URL`. Use HTTPS outside localhost, keep `PI_HUMAN_MESSAGE_WEBHOOK_TOKEN` in a secret manager or process environment, and make the receiving endpoint enforce idempotency and authorization. Do not put credentials in the URL.
+
 ## Supported versions
 
 While the project is pre-1.0, security fixes are made on the latest released minor version only.

@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   evaluateHumanMessages,
   type HumanMessageBehaviorScenario,
-} from "../src/index.js";
+} from "../src/evaluation.js";
 
 const scenario: HumanMessageBehaviorScenario = {
   id: "two-beats",

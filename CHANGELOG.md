@@ -2,6 +2,16 @@
 
 All notable changes are documented here. The project follows semantic versioning after the initial `0.1.0` release.
 
+## 0.2.0 - 2026-09-02
+
+- Turn the repository into a discoverable Pi package with a default Extension entry.
+- Add a safe route-bound Webhook delivery port and `/human-message` status command.
+- Keep the installed extension inactive until a valid delivery endpoint is configured.
+- Separate evaluation exports from the default runtime API.
+- Add a runnable local Webhook demo and a real Pi CLI Extension smoke path.
+- Add architecture documentation and unedited real-model message examples.
+- Expand deterministic coverage from 14 to 20 tests.
+
 ## 0.1.0 - 2026-09-02
 
 - Add the Agent-authored human-message system contract and compact turn reminder.
