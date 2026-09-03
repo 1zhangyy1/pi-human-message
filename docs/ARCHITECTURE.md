@@ -78,7 +78,7 @@ host turn boundary
   10. if needed, run no more than one recovery prompt with the same durable turn identity
 ```
 
-Pi can produce several low-level model turns while resolving tool calls. The message cap belongs to the person-opened prompt, not to individual token streams. The installable extension resets and injects its hidden reminder on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. A host that runs recovery must keep its own durable turn boundary and avoid treating an infinite retry loop as recovery.
+Pi can produce several low-level model turns while resolving tool calls. The message cap belongs to the person-opened prompt, not to individual token streams. The installable extension resets and injects its hidden reminder on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. A durable host that resumes a turn passes the number of already committed bubbles as `initialSentCount`, so a process retry cannot bypass the turn cap. A host that runs recovery must keep its own durable turn boundary and avoid treating an infinite retry loop as recovery.
 
 ## Module responsibilities
 

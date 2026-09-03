@@ -46,6 +46,26 @@ test("turn-bound delivery enforces and resets the hard message cap", async () =>
   assert.deepEqual(delivered, ["一", "二", "新一轮"]);
 });
 
+test("turn-bound delivery resumes from already committed messages", async () => {
+  const delivered: string[] = [];
+  const port = createTurnBoundSendMessagePort(async (request) => {
+    delivered.push(request.text);
+    return {
+      messageId: `message-${delivered.length}`,
+      externalMessageIds: [],
+      idempotentReplay: false,
+    };
+  }, { maxMessagesPerTurn: 2, initialSentCount: 1 });
+
+  assert.equal(port.sentCount, 1);
+  await port.send({ toolCallId: "call-2", text: "second" });
+  await assert.rejects(
+    port.send({ toolCallId: "call-3", text: "third" }),
+    /turn limit reached/u,
+  );
+  assert.deepEqual(delivered, ["second"]);
+});
+
 test("send_message rejects empty and over-limit bubbles before delivery", async () => {
   let calls = 0;
   const tool = createSendMessageAgentTool(async () => {
