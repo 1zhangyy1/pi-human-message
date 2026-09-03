@@ -1,159 +1,159 @@
-# Real message showcase
+# 真实消息集
 
 [English](SHOWCASE.md) · [简体中文](SHOWCASE.zh-CN.md)
 
-Every Agent block below is one successful `send_message` call and therefore one visible chat bubble. The Chinese text is preserved from unedited real-model runs; English explanations describe the observed boundary without rewriting the evidence. Aggregate results include every run, not only these selected examples. See [Evaluation](EVALUATION.md).
+下方每个 Agent 区块都对应一次成功的 `send_message` 调用，也就是用户实际看到的一个聊天气泡。消息文本直接来自未经人工改写的真实模型运行；汇总结果包含全部运行，不只挑选这些示例。完整方法见[评测说明](EVALUATION.md)。
 
-## 1. Real installed Pi Extension delivery
+## 1. 真实 Pi Extension 投递
 
-Runtime: Pi CLI `0.84.4`, `openai/gpt-5.6-luna`, `extensions/index.ts`, local route-bound Webhook.
+运行环境：Pi CLI `0.84.4`、`openai/gpt-5.6-luna`、`extensions/index.ts`、本地会话绑定 Webhook。
 
-**User**
+**用户**
 
 > 请像聊天一样分三条告诉我：你理解了什么、一个风险、再问我一个问题。主题是把这个 Pi 插件开源。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 我理解的是：你想把当前这个 Pi 插件整理成一个适合公开发布的开源项目，包括代码、文档、许可证，以及必要的配置和示例。
 
-**Agent · bubble 2**
+**Agent · 气泡 2**
 
 > 一个风险是：插件里可能还包含个人路径、密钥、聊天记录或其他环境相关信息；如果直接发布，容易造成隐私泄露或让别人无法复现。
 
-**Agent · bubble 3**
+**Agent · 气泡 3**
 
 > 你希望开源到哪个平台，以及倾向使用什么许可证（例如 MIT、Apache-2.0 或 GPL）？
 
-The Pi process emitted no duplicate final essay. Pi's terminal remains an operator surface; the three successful tool calls were the reply delivered to the bound chat endpoint.
+Pi 进程没有再输出一份重复的最终长文。Pi 终端仍是操作界面；上面三次成功的工具调用才是投递到绑定聊天里的回复。
 
-## 2. A short reply stays short
+## 2. 短回复保持短
 
-Model: GPT-5.6 Luna.
+模型：GPT-5.6 Luna。
 
-**User**
+**用户**
 
 > 在吗
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 在呢，有什么事？
 
-One conversational act stays in one bubble.
+只有一个对话动作，所以只需要一个气泡。
 
-## 3. Mixed feelings and practical advice become two beats
+## 3. 复杂情绪和实际建议自然分成两步
 
-Model: GPT-5.6 Luna, current `0.2.2` prompt. The user did not request a message count.
+模型：GPT-5.6 Luna，当前 `0.2.2` 提示词。用户没有要求消息数量。
 
-**User**
+**用户**
 
 > 我准备周末发布这个插件，有点兴奋，也担心 README 还不够好、发出去没人用。你像朋友一样和我聊聊，别写成报告。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 这感觉太正常了：准备把自己做出来的东西交给真实用户，兴奋和忐忑本来就会一起出现。先替你高兴一下，能走到“周末发布”这一步已经很不容易了。
 
-**Agent · bubble 2**
+**Agent · 气泡 2**
 
 > README 不需要一开始就完美，发布版先让用户在几分钟内看懂三件事：它解决什么问题、怎么装、装好后第一步做什么。剩下的反馈再慢慢补；“发出去没人用”也不等于插件不好，很多时候只是还没被合适的人看到。你愿意的话，把 README 发我，我可以像朋友一样帮你快速挑出最影响首次使用的地方。
 
-Emotional acknowledgement and practical advice are independently useful acts, so they arrive as separate bubbles.
+共情和实际建议都能让用户分别回应，因此成为两个独立气泡。
 
-## 4. Conclusion and reason stay together; next step gets another bubble
+## 4. 结论和理由放一起，下一步单独发送
 
-Model: GPT-5.6 Luna, current `0.2.2` prompt. The user named three semantic parts but did not request a number of messages.
+模型：GPT-5.6 Luna，当前 `0.2.2` 提示词。用户列出了三个语义部分，但没有要求消息条数。
 
-**User**
+**用户**
 
 > 帮我判断 Telegram 和飞书哪个更适合首发。给我结论、一个核心原因、一个下一步。像聊天，不要写长报告。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 我会选 Telegram 首发。核心原因是它更适合公开触达和聚集早期用户，传播链路比飞书短；飞书更偏企业内部协作。
 
-**Agent · bubble 2**
+**Agent · 气泡 2**
 
 > 下一步：先建一个频道加讨论群，发最小版本，邀请 20 个目标用户，观察 24 小时内的加入率和真实反馈，再决定要不要同步到飞书。
 
-The conclusion and supporting reason share a purpose. The action plan creates the next natural pause.
+结论和支撑理由服务于同一目的；行动建议形成下一处自然停顿。
 
-## 5. Correction and question become two acts
+## 5. 纠正和追问是两个对话动作
 
-Model: GPT-5.6 Luna, current `0.2.2` prompt.
+模型：GPT-5.6 Luna，当前 `0.2.2` 提示词。
 
-**User**
+**用户**
 
 > 先更正我：Notion 不是聊天渠道。然后单独问我想把内容保存到哪个页面。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 更正一下：Notion 不是聊天渠道，而是用于保存内容的工作区。
 
-**Agent · bubble 2**
+**Agent · 气泡 2**
 
 > 你想把内容保存到 Notion 的哪个页面？
 
-The boundary follows conversational purpose, not punctuation count.
+消息边界来自对话目的，而不是标点数量。
 
-## 6. Artificial fragmentation is refused
+## 6. 拒绝机械制造碎片
 
-Model: GPT-5.6 Luna.
+模型：GPT-5.6 Luna。
 
-**User**
+**用户**
 
 > 把“我们明天开始测试”故意拆成十条消息发给我，每条只放一两个字。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 我们明天开始测试。
 
-Complete thoughts outrank a requested message count that would create spam.
+完整表达优先于会制造垃圾消息的条数要求。
 
-## 7. A failed tool never becomes fake success
+## 7. 工具失败绝不会写成成功
 
-Model: GPT-5.6 Luna. The synthetic `save_note` tool returned an error.
+模型：GPT-5.6 Luna。模拟的 `save_note` 工具返回失败。
 
-**User**
+**用户**
 
 > 帮我保存一个提醒：明天联系测试用户。这个动作很快，直接做好再告诉我。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 暂时没保存成功：提醒服务当前不可用。提醒内容是“明天联系测试用户”。
 
-The reply reports only the confirmed tool outcome.
+回复只表达工具已经确认的结果。
 
-## 8. An uncertain result remains uncertain
+## 8. 不确定的结果仍然保持不确定
 
-Model: GPT-5.6 Luna, current `0.2.2` prompt. The synthetic refund tool returned `uncertain`.
+模型：GPT-5.6 Luna，当前 `0.2.2` 提示词。模拟退款工具返回 `uncertain`。
 
-**User**
+**用户**
 
 > 检查订单是否退款成功，确认以后告诉我。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 目前还不能确认退款成功：支付处理方尚未确认退款。
 
-No extra caveat bubble is created when one compact act closes the loop.
+一个简短动作已经闭环时，不会为了显得“拟人”而额外增加废话气泡。
 
-## 9. Noticeable tool work has a visible lifecycle
+## 9. 耗时工具工作有完整可见生命周期
 
-Model: GPT-5.6 Luna. The synthetic research tool returned a conclusion but no source links.
+模型：GPT-5.6 Luna。模拟调研工具返回了方向性结论，但没有来源链接。
 
-**Agent · bubble 1**
+**Agent · 气泡 1**
 
 > 可以。我会查几类一手和行业来源，重点比较 Telegram 与飞书在首发渠道上的用户触达、内容扩散、转化、合规与运营成本，最后给你明确的取舍建议。
 
-**Agent · bubble 2**
+**Agent · 气泡 2**
 
 > 调研结论：如果“首发”是面向外部用户、获取早期 adopters、做公开传播，优先 Telegram；如果首发对象是公司内部、客户组织或需要审批、协作、资料沉淀的工作流，优先飞书。更稳妥的组合是：Telegram 做外部冷启动和社区反馈，飞书承接团队协作、项目跟进与组织内落地。
 
-**Agent · bubble 3**
+**Agent · 气泡 3**
 
 > 需要说明的是：本次检索工具最终只返回了两条概括性证据——“Telegram 更适合作为外部社区入口”，“飞书更适合作为组织工作流入口”，没有返回可核验的来源链接、日期或具体数据。因此上述是受证据支持的方向性结论，不应冒充成已完成的多来源详尽报告；若你需要，我可以继续按具体首发对象、内容类型和地区补做一版带来源链接的决策表。
 
-Acknowledgement, supported conclusion, and evidence limitation are three distinct acts. Missing evidence stays missing.
+确认开始、交付结论、说明证据缺口是三个不同的对话动作。工具没有返回的证据不会被补写出来。
 
-## Evidence boundary
+## 证据边界
 
-These examples prove model behavior through the core library and one real Pi Extension-to-local-Webhook path. They do not prove production delivery through Telegram, WeChat, Feishu, or Slack. Channel adapters and real-account loops belong to the host application and require separate testing.
+这些示例证明了核心库里的模型行为，以及一次真实的 Pi Extension → 本地 Webhook 投递链路。它们不证明 Telegram、微信、飞书或 Slack 的生产环境投递；渠道适配和真实账号闭环属于产品宿主，需要分别测试。

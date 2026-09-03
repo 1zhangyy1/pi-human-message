@@ -2,6 +2,11 @@
 
 All notable changes are documented here. The project follows semantic versioning after the initial `0.1.0` release.
 
+## Unreleased
+
+- Split the repository homepage into dedicated English and Simplified Chinese READMEs.
+- Expand the README and showcase into visual user-to-bubble transcripts with nine real behavior examples.
+
 ## 0.2.2 - 2026-09-03
 
 - Teach the Agent to group messages by conversational act instead of paragraph shape.

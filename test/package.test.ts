@@ -9,8 +9,10 @@ import installedExtension, {
 test("package declares a discoverable Pi extension", async () => {
   const packageJson = JSON.parse(
     await readFile(new URL("../package.json", import.meta.url), "utf8"),
-  ) as { keywords?: string[]; pi?: { extensions?: string[] } };
+  ) as { files?: string[]; keywords?: string[]; pi?: { extensions?: string[] } };
   assert.equal(packageJson.keywords?.includes("pi-package"), true);
+  assert.equal(packageJson.files?.includes("README.md"), true);
+  assert.equal(packageJson.files?.includes("README.zh-CN.md"), true);
   assert.deepEqual(packageJson.pi?.extensions, ["./extensions/index.ts"]);
   assert.equal(typeof installedExtension, "function");
 });
