@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Human Message · 拟人发消息</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #202323;
+        background: #252828;
+        font-synthesis: none;
+        --ink: #202323;
+        --muted: #6d7373;
+        --line: #dfe2e2;
+        --blue: #0a84ff;
+        --lavender: #b9a9ff;
+        --mint: #c9f5be;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        width: 100%;
+        min-width: 320px;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        padding: 3.5vh 4.5vw;
+        display: grid;
+        place-items: center;
+        background: #252828;
+      }
+
+      .poster {
+        width: min(100%, 920px);
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        background: #fff;
+        border: 2px solid var(--ink);
+        box-shadow: 14px 14px 0 var(--ink);
+      }
+
+      .topbar {
+        min-height: 72px;
+        padding: 18px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 17px;
+        font-weight: 760;
+        letter-spacing: -0.02em;
+      }
+
+      .mark {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border: 1.5px solid var(--ink);
+        border-radius: 10px;
+        background: var(--lavender);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 11px;
+      }
+
+      .tiny-label {
+        padding: 8px 11px;
+        border-radius: 9px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .intro {
+        padding: clamp(28px, 4vh, 54px) 34px 24px;
+        position: relative;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #5d6363;
+        font-size: 12px;
+        font-weight: 760;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border: 1px solid var(--ink);
+        border-radius: 3px;
+        background: var(--mint);
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(42px, 6.4vw, 68px);
+        font-weight: 540;
+        letter-spacing: -0.065em;
+        line-height: 0.98;
+      }
+
+      .subtitle {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: clamp(16px, 2.4vw, 23px);
+        line-height: 1.45;
+      }
+
+      .chat-wrap {
+        min-height: 0;
+        padding: 8px 34px 20px;
+        display: grid;
+        align-content: end;
+      }
+
+      .phone {
+        min-height: 0;
+        overflow: hidden;
+        border: 1.5px solid var(--ink);
+        border-radius: 24px;
+        background: #f5f5f7;
+        box-shadow: 10px 10px 0 var(--ink);
+      }
+
+      .chat-header {
+        min-height: 66px;
+        padding: 13px 18px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.96);
+        border-bottom: 1px solid #e2e2e6;
+      }
+
+      .back { color: var(--blue); font-size: 13px; }
+      .person { text-align: center; }
+      .person strong { display: block; font-size: 14px; }
+      .person span { color: #8a8d92; font-size: 10px; }
+      .delivered { justify-self: end; color: #85898d; font-size: 11px; }
+
+      .messages {
+        height: clamp(370px, 43vh, 520px);
+        min-height: 0;
+        padding: 22px 18px 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 9px;
+      }
+
+      .bubble {
+        max-width: 84%;
+        padding: 11px 14px;
+        border-radius: 19px;
+        font-size: clamp(14px, 2vw, 18px);
+        line-height: 1.42;
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+        animation: bubble-in 380ms cubic-bezier(.22, .8, .28, 1) forwards;
+      }
+
+      .bubble.user {
+        align-self: flex-end;
+        background: var(--blue);
+        color: #fff;
+        border-bottom-right-radius: 6px;
+      }
+
+      .bubble.agent {
+        align-self: flex-start;
+        background: #e5e5e9;
+        color: #26282a;
+        border-bottom-left-radius: 6px;
+      }
+
+      .first-user { animation-delay: 700ms; }
+      .first-agent { animation-delay: 2700ms; }
+      .second-user { animation-delay: 4800ms; }
+      .second-agent-one { animation-delay: 6900ms; }
+      .second-agent-two { animation-delay: 7900ms; }
+
+      .background-work {
+        width: max-content;
+        max-width: calc(100% - 80px);
+        margin: 5px auto 1px;
+        padding: 7px 11px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid #afd7a5;
+        border-radius: 999px;
+        background: #ecfae8;
+        color: #4e6650;
+        font-size: 11px;
+        font-weight: 700;
+        opacity: 0;
+        transform: translateY(8px);
+        animation:
+          status-in 280ms ease 1500ms forwards,
+          status-out 260ms ease 2400ms forwards;
+      }
+
+      .background-work::before {
+        content: "✓";
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #abdca0;
+        color: #243525;
+      }
+
+      .footer {
+        min-height: 74px;
+        padding: 18px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        border-top: 1px solid var(--line);
+      }
+
+      .footer strong {
+        display: block;
+        font-size: 16px;
+        letter-spacing: -0.02em;
+      }
+
+      .footer span {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .open-source {
+        padding: 9px 12px;
+        border: 1px solid #d0c8ff;
+        border-radius: 9px;
+        background: #eeeaff;
+        font-size: 11px;
+        font-weight: 760;
+      }
+
+      .closing {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        padding: 56px;
+        display: grid;
+        place-content: center;
+        text-align: center;
+        background: #fff;
+        opacity: 0;
+        pointer-events: none;
+        animation: closing-in 520ms ease 9800ms forwards;
+      }
+
+      .closing .mark {
+        width: 58px;
+        height: 58px;
+        margin: 0 auto 24px;
+        border-radius: 15px;
+        font-size: 15px;
+        box-shadow: 7px 7px 0 var(--ink);
+      }
+
+      .closing h2 {
+        margin: 0;
+        font-size: clamp(44px, 8vw, 76px);
+        font-weight: 540;
+        letter-spacing: -0.065em;
+        line-height: 0.98;
+      }
+
+      .closing p {
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: clamp(16px, 2.4vw, 22px);
+        line-height: 1.45;
+      }
+
+      .closing code {
+        width: max-content;
+        max-width: 100%;
+        margin: 28px auto 0;
+        padding: 12px 15px;
+        border: 1px solid var(--ink);
+        border-radius: 9px;
+        background: var(--mint);
+        color: var(--ink);
+        font: 700 clamp(12px, 1.9vw, 16px)/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      @keyframes bubble-in {
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      @keyframes status-in {
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes status-out {
+        to { opacity: 0; transform: translateY(-6px); }
+      }
+
+      @keyframes closing-in {
+        to { opacity: 1; }
+      }
+
+      @media (max-height: 820px) {
+        .intro { padding-top: 20px; padding-bottom: 14px; }
+        .messages { height: 350px; }
+        .bubble { font-size: 14px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bubble,
+        .background-work,
+        .closing { animation-play-state: paused; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="poster">
+      <header class="topbar">
+        <div class="brand"><span class="mark">HM</span> Human Message</div>
+        <span class="tiny-label">Pi Extension</span>
+      </header>
+
+      <section class="intro">
+        <p class="eyebrow">A tiny plugin for better chat</p>
+        <h1>我只想让 Pi，<br>真的像在聊天。</h1>
+        <p class="subtitle">该安静做事时就做事，该多说一句时再多说一句。</p>
+      </section>
+
+      <section class="chat-wrap" aria-label="真实对话示例">
+        <div class="phone">
+          <header class="chat-header">
+            <span class="back">消息</span>
+            <div class="person"><strong>Pi</strong><span>在线</span></div>
+            <span class="delivered">已送达</span>
+          </header>
+
+          <div class="messages">
+            <div class="bubble user first-user">帮我记一下：下周一上午十点和小周开会。</div>
+            <div class="background-work">Pi 在后台记下了</div>
+            <div class="bubble agent first-agent">记好了：下周一上午十点和小周开会。</div>
+
+            <div class="bubble user second-user">我周末想发出去，但越看 README 越觉得哪都不对，有点不敢发了。</div>
+            <div class="bubble agent second-agent-one">这很正常。你不是做得不好，只是已经盯太久了。</div>
+            <div class="bubble agent second-agent-two">先只检查安装、示例、限制和许可证，其他先别改。</div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div><strong>一个对话动作，一个气泡。</strong><span>One conversational beat, one bubble.</span></div>
+        <div class="open-source">Open source</div>
+      </footer>
+
+      <section class="closing">
+        <span class="mark">HM</span>
+        <h2>Human Message<br>拟人发消息</h2>
+        <p>受 Grok Bot / OpenInstinct 的聊天体验启发。<br>一个很小的 Pi 插件，已经开源。</p>
+        <code>github.com/1zhangyy1/pi-human-message</code>
+      </section>
+    </main>
+  </body>
+</html>
