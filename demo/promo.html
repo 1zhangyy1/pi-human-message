@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light">
     <title>Human Message · 拟人发消息</title>
+    <script>
+      document.documentElement.lang = new URLSearchParams(location.search).get("lang") === "en"
+        ? "en"
+        : "zh-CN";
+    </script>
     <style>
       :root {
         color-scheme: light;
@@ -21,6 +26,9 @@
       }
 
       * { box-sizing: border-box; }
+
+      html[lang="zh-CN"] .en,
+      html[lang="en"] .zh { display: none !important; }
 
       html,
       body {
@@ -139,8 +147,11 @@
       }
 
       .phone {
+        height: 100%;
         min-height: 0;
         overflow: hidden;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
         border: 1.5px solid var(--ink);
         border-radius: 24px;
         background: #f5f5f7;
@@ -164,14 +175,18 @@
       .delivered { justify-self: end; color: #85898d; font-size: 11px; }
 
       .messages {
-        height: clamp(370px, 43vh, 520px);
+        height: auto;
         min-height: 0;
         padding: 22px 18px 24px;
+        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
         gap: 9px;
       }
+
+      .messages > .zh,
+      .messages > .en { display: contents; }
 
       .bubble {
         max-width: 84%;
@@ -204,11 +219,21 @@
       .second-agent-one { animation-delay: 6900ms; }
       .second-agent-two { animation-delay: 7900ms; }
 
+      .en-first-user { animation-delay: 700ms; }
+      .en-first-agent { animation-delay: 2700ms; }
+      .en-second-agent { animation-delay: 3700ms; }
+      .en-second-user { animation-delay: 5600ms; }
+      .en-final-agent { animation-delay: 7900ms; }
+
       .background-work {
         width: max-content;
         max-width: calc(100% - 80px);
-        margin: 5px auto 1px;
+        margin: 0;
         padding: 7px 11px;
+        position: absolute;
+        top: 46%;
+        left: 50%;
+        z-index: 2;
         display: flex;
         align-items: center;
         gap: 7px;
@@ -219,7 +244,7 @@
         font-size: 11px;
         font-weight: 700;
         opacity: 0;
-        transform: translateY(8px);
+        transform: translate(-50%, 8px);
         animation:
           status-in 280ms ease 1500ms forwards,
           status-out 260ms ease 2400ms forwards;
@@ -234,6 +259,13 @@
         border-radius: 50%;
         background: #abdca0;
         color: #243525;
+      }
+
+      .background-work.en-second-status {
+        top: 78%;
+        animation:
+          status-in 280ms ease 6500ms forwards,
+          status-out 260ms ease 7500ms forwards;
       }
 
       .footer {
@@ -296,6 +328,7 @@
         font-size: clamp(44px, 8vw, 76px);
         font-weight: 540;
         letter-spacing: -0.065em;
+        word-spacing: 0.08em;
         line-height: 0.98;
       }
 
@@ -323,11 +356,11 @@
       }
 
       @keyframes status-in {
-        to { opacity: 1; transform: translateY(0); }
+        to { opacity: 1; transform: translate(-50%, 0); }
       }
 
       @keyframes status-out {
-        to { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 0; transform: translate(-50%, -6px); }
       }
 
       @keyframes closing-in {
@@ -336,7 +369,6 @@
 
       @media (max-height: 820px) {
         .intro { padding-top: 20px; padding-bottom: 14px; }
-        .messages { height: 350px; }
         .bubble { font-size: 14px; }
       }
 
@@ -355,40 +387,65 @@
       </header>
 
       <section class="intro">
-        <p class="eyebrow">A tiny plugin for better chat</p>
-        <h1>我只想让 Pi，<br>真的像在聊天。</h1>
-        <p class="subtitle">该安静做事时就做事，该多说一句时再多说一句。</p>
+        <p class="eyebrow">
+          <span class="zh">A tiny plugin for better chat</span>
+          <span class="en">Imagined everyday case · real behavior</span>
+        </p>
+        <h1>
+          <span class="zh">我只想让 Pi，<br>真的像在聊天。</span>
+          <span class="en">Let Pi work.<br>Keep the chat human.</span>
+        </h1>
+        <p class="subtitle">
+          <span class="zh">该安静做事时就做事，该多说一句时再多说一句。</span>
+          <span class="en">Quietly do the work. Say only what helps.</span>
+        </p>
       </section>
 
       <section class="chat-wrap" aria-label="真实对话示例">
         <div class="phone">
           <header class="chat-header">
-            <span class="back">消息</span>
-            <div class="person"><strong>Pi</strong><span>在线</span></div>
-            <span class="delivered">已送达</span>
+            <span class="back"><span class="zh">消息</span><span class="en">Messages</span></span>
+            <div class="person"><strong>Pi</strong><span><span class="zh">在线</span><span class="en">online</span></span></div>
+            <span class="delivered"><span class="zh">已送达</span><span class="en">Delivered</span></span>
           </header>
 
           <div class="messages">
-            <div class="bubble user first-user">帮我记一下：下周一上午十点和小周开会。</div>
-            <div class="background-work">Pi 在后台记下了</div>
-            <div class="bubble agent first-agent">记好了：下周一上午十点和小周开会。</div>
+            <div class="zh">
+              <div class="bubble user first-user">帮我记一下：下周一上午十点和小周开会。</div>
+              <div class="background-work">Pi 在后台记下了</div>
+              <div class="bubble agent first-agent">记好了：下周一上午十点和小周开会。</div>
 
-            <div class="bubble user second-user">我周末想发出去，但越看 README 越觉得哪都不对，有点不敢发了。</div>
-            <div class="bubble agent second-agent-one">这很正常。你不是做得不好，只是已经盯太久了。</div>
-            <div class="bubble agent second-agent-two">先只检查安装、示例、限制和许可证，其他先别改。</div>
+              <div class="bubble user second-user">我周末想发出去，但越看 README 越觉得哪都不对，有点不敢发了。</div>
+              <div class="bubble agent second-agent-one">这很正常。你不是做得不好，只是已经盯太久了。</div>
+              <div class="bubble agent second-agent-two">先只检查安装、示例、限制和许可证，其他先别改。</div>
+            </div>
+
+            <div class="en">
+              <div class="bubble user en-first-user">Did I ever reply to Alex about Friday?</div>
+              <div class="background-work">Checked messages and calendar</div>
+              <div class="bubble agent en-first-agent">No — the thread stopped after Alex asked if 3pm works.</div>
+              <div class="bubble agent en-second-agent">You’re free then. Want me to reply?</div>
+              <div class="bubble user en-second-user">Yes, tell him that works.</div>
+              <div class="background-work en-second-status">Reply sent</div>
+              <div class="bubble agent en-final-agent">Done.</div>
+            </div>
           </div>
         </div>
       </section>
 
       <footer class="footer">
-        <div><strong>一个对话动作，一个气泡。</strong><span>One conversational beat, one bubble.</span></div>
+        <div>
+          <strong><span class="zh">一个对话动作，一个气泡。</span><span class="en">One conversational beat, one bubble.</span></strong>
+          <span><span class="zh">One conversational beat, one bubble.</span><span class="en">Concept conversation · production extension</span></span>
+        </div>
         <div class="open-source">Open source</div>
       </footer>
 
       <section class="closing">
         <span class="mark">HM</span>
-        <h2>Human Message<br>拟人发消息</h2>
-        <p>受 Grok Bot / OpenInstinct 的聊天体验启发。<br>一个很小的 Pi 插件，已经开源。</p>
+        <h2>Human&nbsp;Message<br><span class="zh">拟人发消息</span><span class="en">for Pi</span></h2>
+        <p class="zh">受 Grok Bot / Instinct 的聊天体验启发。<br>一个很小的 Pi 插件，已经开源。</p>
+        <p class="en">Inspired by chat-first personal agents.<br>A tiny Pi extension, now open source.</p>
         <code>github.com/1zhangyy1/pi-human-message</code>
       </section>
     </main>
