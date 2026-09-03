@@ -105,9 +105,9 @@ The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded
 
 ## Why there is no punctuation splitter
 
-Post-generation splitting cannot know which clauses are acknowledgements, conclusions, corrections, limitations, or questions. It also cannot safely undo a bubble that has already been delivered. Human Message makes boundaries part of the Agent's generation action: each tool call must already stand alone as a complete thought.
+Post-generation splitting cannot know which clauses are emotional acknowledgement, explanation, correction, next step, limitation, or question. It also cannot safely undo a bubble that has already been delivered. Human Message makes boundaries part of the Agent's generation action: each tool call must already stand alone as one complete conversational act. A purpose change plus a natural pause creates the next call; punctuation or line breaks do not.
 
-The 700-character default is a soft planning budget, not a slicing threshold. The host's `maxMessageChars` remains the actual hard transport guard.
+The 700-character default is a soft UX ceiling, not a target or slicing threshold. The host's `maxMessageChars` remains the actual hard transport guard.
 
 ## Why there are no built-in channel adapters
 

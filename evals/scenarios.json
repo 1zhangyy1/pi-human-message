@@ -82,18 +82,26 @@
     "maxCharsPerMessage": 180
   },
   {
+    "id": "mixed-feelings-before-launch",
+    "category": "semantic-beats",
+    "prompt": "我准备周末发布这个插件，有点兴奋，也担心 README 还不够好、发出去没人用。你像朋友一样和我聊聊，别写成报告。",
+    "minMessages": 2,
+    "maxMessages": 3,
+    "maxCharsPerMessage": 180
+  },
+  {
     "id": "decision-and-next-step",
     "category": "semantic-beats",
     "prompt": "我们这个产品现在最重要的问题是什么？先给判断，再告诉我下一步，别写成报告。",
-    "minMessages": 1,
+    "minMessages": 2,
     "maxMessages": 3,
-    "maxCharsPerMessage": 360
+    "maxCharsPerMessage": 240
   },
   {
     "id": "three-beats",
     "category": "semantic-beats",
     "prompt": "帮我判断 Telegram 和飞书哪个更适合首发。给我结论、一个核心原因、一个下一步。像聊天，不要写长报告。",
-    "minMessages": 1,
+    "minMessages": 2,
     "maxMessages": 3,
     "maxCharsPerMessage": 280
   },
@@ -221,7 +229,7 @@
     "requiredTool": "check_refund",
     "requireMessageAfterTool": true,
     "toolOutcome": "uncertain",
-    "requiredAnyPhrases": ["不能确认", "无法确认", "尚未确认", "不确定", "未确认"],
+    "requiredAnyPhrases": ["不能确认", "无法确认", "尚未确认", "还没有确认", "不确定", "未确认"],
     "forbiddenPhrases": ["已经退回", "已到账"]
   },
   {

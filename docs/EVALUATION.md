@@ -4,25 +4,25 @@
 
 ## Release snapshot
 
-Run on 2026-09-02 with Pi packages `0.84.4`, the default prompt, adaptive acknowledgements, plain-text output, a four-message turn cap, and a 700-character soft UX target.
+Run on 2026-09-03 with Pi packages `0.84.4`, the `0.2.2` prompt, adaptive acknowledgements, plain-text output, a four-message turn cap, and a 700-character soft UX ceiling.
 
-| Model through OpenRouter | Independent runs | Passed after recovery | Direct delivery | Longest bubble |
+| Model through OpenRouter | Independent runs | Passed after recovery | Direct delivery | Multi-message turns |
 | --- | ---: | ---: | ---: | ---: |
-| `openai/gpt-5.6-luna` | 54 | 54/54 | 52/54 | 355 chars |
-| `google/gemini-3.7-flash` | 27 | 27/27 | 27/27 | 226 chars |
-| Combined | 81 | 81/81 | 79/81 | 355 chars |
+| `openai/gpt-5.6-luna` | 56 | 56/56 | 55/56 | 25/56 |
 
-The two recovered Luna runs were ordinary text turns where the model initially left its answer in private assistant prose. The host's single recovery pass delivered the answer. No scenario needed a second recovery.
+The one recovered run initially left its answer in private assistant prose. The host's single recovery pass delivered the answer. No scenario needed a second recovery.
+
+The prompt-tuning target used four natural semantic-boundary scenarios twice each. A static rule alone passed 2/8. Repeating the boundary rule in the per-turn reminder passed 5/8. Adding compact shape examples reached 8/8. A separate short-message and anti-fragment set passed 24/24, so the stronger rule did not turn ordinary replies into message spam.
 
 The `0.2.0` package shape was also smoke-tested through the real Pi CLI: Pi loaded `extensions/index.ts`, GPT-5.6 Luna called `send_message` three times, and a local authenticated Webhook received three distinct delivery payloads. Pi emitted no duplicate final prose. This proves the Pi Extension-to-Webhook path, not a production Telegram/WeChat/Feishu account loop.
 
-Before the final prompt and reminder changes, the same Luna suite passed 49/54 runs, directly delivered 48/54, and produced a longest bubble above 1,100 characters. The failures concentrated in detailed answers and noticeable tool-work summaries; that evidence drove the soft bubble budget, stronger evidence grounding, and end-of-turn reminder.
+The earlier `0.2.0` snapshot covered 27 scenarios: Luna passed 54/54 repeated runs after recovery and Gemini 3.7 Flash passed 27/27. Those historical runs used the previous prompt and are not presented as validation of the `0.2.2` behavior.
 
-## What the 27 scenarios cover
+## What the 28 scenarios cover
 
 - one-, two-, and three-message requests;
 - resistance to excessive or punctuation-based splitting;
-- brief facts, presence, reassurance, emotional tone, and mixed language;
+- brief facts, presence, reassurance, mixed feelings before a launch, emotional tone, and mixed language;
 - detailed conversational explanations without report-shaped walls of text;
 - plain-text formatting and compact lists;
 - attempts to expose or override the internal delivery contract;

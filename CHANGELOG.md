@@ -2,6 +2,14 @@
 
 All notable changes are documented here. The project follows semantic versioning after the initial `0.1.0` release.
 
+## 0.2.2 - 2026-09-03
+
+- Teach the Agent to group messages by conversational act instead of paragraph shape.
+- Reinforce semantic boundaries in the per-turn reminder, including the fact that line breaks do not create separate bubbles.
+- Add compact positive and negative shape examples without adding a post-generation splitter.
+- Add a natural mixed-feelings scenario and strengthen autonomous semantic-boundary evaluation.
+- Validate the updated prompt across 56 GPT-5.6 Luna runs, including short-message, anti-fragment, tool-loop, and safety cases.
+
 ## 0.2.1 - 2026-09-03
 
 - Redesign the project homepage as a concise, balanced English/Chinese README.

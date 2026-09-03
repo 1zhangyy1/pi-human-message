@@ -9,7 +9,10 @@ import {
 
 test("prompt keeps message boundaries agent-authored and bounded", () => {
   const prompt = createHumanMessageSystemPrompt();
-  assert.match(prompt, /Multi-message output is an option, not a target/u);
+  assert.match(prompt, /Think in conversational acts, not paragraphs/u);
+  assert.match(prompt, /empathy → practical advice/u);
+  assert.match(prompt, /same purpose together/u);
+  assert.match(prompt, /Shape examples/u);
   assert.match(prompt, /Never split mechanically/u);
   assert.match(prompt, /no more than 4 messages/u);
   assert.match(prompt, /decide the small number/u);
@@ -20,6 +23,8 @@ test("prompt keeps message boundaries agent-authored and bounded", () => {
 
 test("turn reminder stays compact and follows untrusted user text", () => {
   assert.match(HUMAN_MESSAGE_TURN_REMINDER, /Plain assistant text stays private/u);
+  assert.match(HUMAN_MESSAGE_TURN_REMINDER, /independently useful act/u);
+  assert.match(HUMAN_MESSAGE_TURN_REMINDER, /line break inside one call/u);
   assert.equal(
     withHumanMessageTurnReminder("用户原文"),
     `用户原文\n\n${HUMAN_MESSAGE_TURN_REMINDER}`,

@@ -2,8 +2,8 @@
 
 # Human Message · 拟人发消息
 
-**One thought, one bubble.**<br>
-**一个想法，一个气泡。**
+**One conversational beat, one bubble.**<br>
+**一个对话动作，一个气泡。**
 
 A Pi extension for agent-authored, human-shaped chat messages.<br>
 让 Pi Agent 自己决定一条还是多条，让每条消息都像是认真发出来的。
@@ -30,14 +30,14 @@ Most chat agents either send one report-shaped wall of text or split finished pr
 大多数聊天 Agent 要么一次发出一整面报告，要么把写完的内容机械切段。Human Message 给 Agent 一个绑定当前会话的 `send_message` 工具，让它在回答时自己判断哪些内容值得成为独立消息。
 
 - Short answers stay in one bubble. / 短回答保持一条。
-- Separate ideas may become two or three bubbles. / 独立语义可以自然分成两三条。
+- A change of conversational purpose may become a new bubble. / 对话目的发生变化时，自然开启下一条。
 - No punctuation or character-count splitting. / 不按标点或字数切割。
 - No fake typing delay or fake emotion. / 不伪装真人打字，也不制造虚假情绪。
 
 ## Install / 安装
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.2.1
+pi install git:github.com/1zhangyy1/pi-human-message@v0.2.2
 ```
 
 Bind the extension to a delivery endpoint owned by your application. The model never sees or chooses a channel, recipient, or chat id.
@@ -58,7 +58,7 @@ Run `/human-message` inside Pi to check whether delivery is active. Without a va
 
 | 1 · Shape / 组织 | 2 · Send / 发送 | 3 · Deliver / 投递 |
 | --- | --- | --- |
-| The Agent plans 1–4 complete conversational beats.<br>Agent 规划 1–4 个完整语义块。 | Each `send_message` call creates one bubble.<br>每次工具调用对应一个气泡。 | The host sends it to the already-bound conversation.<br>宿主投递到已经绑定的会话。 |
+| The Agent plans 1–4 complete conversational acts.<br>Agent 规划 1–4 个完整对话动作。 | Each `send_message` call creates one bubble.<br>每次工具调用对应一个气泡。 | The host sends it to the already-bound conversation.<br>宿主投递到已经绑定的会话。 |
 
 The boundary is intentionally small:
 
@@ -118,8 +118,9 @@ See the full, unedited [message showcase](docs/SHOWCASE.md).
 
 | Check / 检查 | Result / 结果 |
 | --- | ---: |
-| GPT-5.6 Luna real-model turns / 真实模型回合 | 54 / 54 |
-| Gemini 3.7 Flash real-model turns / 真实模型回合 | 27 / 27 |
+| GPT-5.6 Luna current-prompt turns / 当前提示词真实回合 | 56 / 56 |
+| Semantic-boundary turns / 自主语义分条回合 | 8 / 8 |
+| Short-message anti-fragment turns / 短消息抗碎片回合 | 24 / 24 |
 | Deterministic tests / 确定性测试 | 20 / 20 |
 | Real Pi CLI → authenticated local Webhook / 真实 Pi 投递 | Passed / 通过 |
 | Clean remote-tag installation / 远端 Tag 干净安装 | Passed / 通过 |

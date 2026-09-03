@@ -107,7 +107,9 @@ export function createSendMessageAgentTool(
     description: [
       "Deliver one complete user-visible message to the current conversation now.",
       "Each call creates a separate chat bubble and returns its delivery receipt.",
-      "Use one call for a normal concise reply; call again only for a distinct conversational beat or a later verified result.",
+      "Keep exactly one conversational act in this bubble; call again when the purpose changes and a natural pause belongs between acts, or when a later verified result arrives.",
+      "A line break inside one call is still one bubble and must not be used to combine distinct acts.",
+      "Do not maximize message count: closely related sentences with the same purpose belong together.",
       "The text must stand on its own as a complete thought; never send an incomplete word or sentence fragment merely to reach a requested message count.",
       "Plain assistant text is private, and the host already binds the destination, so do not provide a channel or recipient.",
     ].join(" "),
