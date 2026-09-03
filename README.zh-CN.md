@@ -6,17 +6,15 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
+<a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-readme-zh.mp4">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-zh.gif" width="900" alt="Human Message：Pi 在后台安静完成任务，再用自然的聊天气泡回复">
+</a>
+
+<sub>8 秒看懂它 · 点击观看 MP4</sub>
+
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-c9f5be)](LICENSE)
-
-<br>
-
-<a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-promo.mp4">
-  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-promo.gif" width="540" alt="Human Message 中文聊天演示">
-</a>
-
-<sub>12 秒演示 · 点击观看高清 MP4</sub>
 
 </div>
 

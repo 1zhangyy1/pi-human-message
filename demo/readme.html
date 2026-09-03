@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Human Message — README demo</title>
+    <script>
+      document.documentElement.lang = new URLSearchParams(location.search).get("lang") === "en"
+        ? "en"
+        : "zh-CN";
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #202323;
+        background: #fff;
+        font-synthesis: none;
+        --ink: #202323;
+        --muted: #6c7272;
+        --line: #dfe2e2;
+        --blue: #0a84ff;
+        --lavender: #c8bdff;
+        --mint: #d4f7cb;
+      }
+
+      * { box-sizing: border-box; }
+
+      html[lang="zh-CN"] .en,
+      html[lang="en"] .zh { display: none !important; }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body { background: #fff; }
+
+      .stage {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows: 66px minmax(0, 1fr);
+        background:
+          radial-gradient(circle at 46% 100%, rgba(212, 247, 203, 0.5), transparent 32%),
+          #fff;
+        border: 1px solid var(--line);
+      }
+
+      .topbar {
+        padding: 0 34px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-size: 17px;
+        font-weight: 760;
+        letter-spacing: -0.025em;
+      }
+
+      .mark {
+        width: 31px;
+        height: 31px;
+        display: grid;
+        place-items: center;
+        border: 1.5px solid var(--ink);
+        border-radius: 9px;
+        background: var(--lavender);
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .extension {
+        padding: 7px 10px;
+        border-radius: 8px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .content {
+        min-height: 0;
+        padding: 32px 42px 36px;
+        display: grid;
+        grid-template-columns: minmax(0, 0.87fr) minmax(520px, 1.13fr);
+        gap: 48px;
+        align-items: center;
+      }
+
+      .copy {
+        align-self: center;
+        padding-left: 8px;
+      }
+
+      .eyebrow {
+        margin: 0 0 18px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #555b5b;
+        font-size: 11px;
+        font-weight: 760;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border: 1px solid var(--ink);
+        border-radius: 3px;
+        background: var(--mint);
+      }
+
+      h1 {
+        max-width: 500px;
+        margin: 0;
+        font-size: clamp(46px, 5.1vw, 68px);
+        font-weight: 540;
+        letter-spacing: -0.065em;
+        line-height: 0.98;
+      }
+
+      html[lang="zh-CN"] h1 {
+        font-size: clamp(45px, 4.9vw, 64px);
+        letter-spacing: -0.075em;
+        line-height: 1.06;
+      }
+
+      .lead {
+        max-width: 440px;
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .principles {
+        margin: 26px 0 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        list-style: none;
+      }
+
+      .principles li {
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: #fff;
+        color: #4d5353;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .principles li:first-child {
+        border-color: #b9e4af;
+        background: #effbec;
+      }
+
+      .chat-card {
+        min-height: 0;
+        overflow: hidden;
+        border: 1.5px solid var(--ink);
+        border-radius: 22px;
+        background: #f5f5f7;
+        box-shadow: 10px 10px 0 var(--ink);
+      }
+
+      .chat-header {
+        min-height: 62px;
+        padding: 12px 18px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        border-bottom: 1px solid #e0e1e4;
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .back { color: var(--blue); font-size: 12px; }
+      .person { text-align: center; }
+      .person strong { display: block; font-size: 13px; }
+      .person span { display: block; margin-top: 2px; color: #858a8d; font-size: 9px; }
+      .delivered { justify-self: end; color: #858a8d; font-size: 10px; }
+
+      .messages {
+        height: 425px;
+        padding: 22px 19px 23px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .messages > .zh,
+      .messages > .en { display: contents; }
+
+      .bubble {
+        max-width: 86%;
+        padding: 10px 13px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.38;
+        opacity: 0;
+        transform: translateY(12px) scale(0.985);
+        animation: bubble-in 360ms cubic-bezier(.22, .8, .28, 1) forwards;
+      }
+
+      .bubble.user {
+        align-self: flex-end;
+        border-bottom-right-radius: 6px;
+        background: var(--blue);
+        color: #fff;
+      }
+
+      .bubble.agent {
+        align-self: flex-start;
+        border-bottom-left-radius: 6px;
+        background: #e5e5e9;
+        color: #26282a;
+      }
+
+      .user-one { animation-delay: 450ms; }
+      .agent-one { animation-delay: 2500ms; }
+      .agent-two { animation-delay: 3400ms; }
+      .user-two { animation-delay: 4700ms; }
+      .agent-three { animation-delay: 6900ms; }
+
+      .work {
+        width: max-content;
+        max-width: calc(100% - 70px);
+        margin: 0;
+        padding: 7px 10px;
+        position: absolute;
+        left: 50%;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid #b7dfaE;
+        border-radius: 999px;
+        background: #effbec;
+        color: #526753;
+        font-size: 10px;
+        font-weight: 700;
+        opacity: 0;
+        transform: translate(-50%, 7px);
+      }
+
+      .work::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #63a656;
+        box-shadow: 0 0 0 3px #d5efcf;
+      }
+
+      .work-one {
+        top: 48%;
+        animation: status-in 240ms ease 1250ms forwards, status-out 220ms ease 2200ms forwards;
+      }
+
+      .work-two {
+        top: 79%;
+        animation: status-in 240ms ease 5500ms forwards, status-out 220ms ease 6500ms forwards;
+      }
+
+      @keyframes bubble-in {
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      @keyframes status-in {
+        to { opacity: 1; transform: translate(-50%, 0); }
+      }
+
+      @keyframes status-out {
+        to { opacity: 0; transform: translate(-50%, -5px); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bubble { opacity: 1; transform: none; animation: none; }
+        .work { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage">
+      <header class="topbar">
+        <div class="brand"><span class="mark">HM</span> Human Message</div>
+        <span class="extension">Pi Extension</span>
+      </header>
+
+      <div class="content">
+        <section class="copy">
+          <p class="eyebrow"><span class="zh">一个很小的 Pi 插件</span><span class="en">A tiny Pi extension</span></p>
+          <h1>
+            <span class="zh">让 Pi 做事，<br>也像在聊天。</span>
+            <span class="en">Let Pi work.<br>Keep chat human.</span>
+          </h1>
+          <p class="lead">
+            <span class="zh">任务在后台安静完成，结果自然地用一两条消息告诉你。</span>
+            <span class="en">Work happens quietly. The result arrives as one or two natural messages.</span>
+          </p>
+          <ul class="principles">
+            <li><span class="zh">后台安静做事</span><span class="en">Quiet tool work</span></li>
+            <li><span class="zh">一件事，一个气泡</span><span class="en">One beat, one bubble</span></li>
+          </ul>
+        </section>
+
+        <section class="chat-card" aria-label="Human Message conversation demo">
+          <header class="chat-header">
+            <span class="back"><span class="zh">消息</span><span class="en">Messages</span></span>
+            <div class="person"><strong>Pi</strong><span><span class="zh">在线</span><span class="en">online</span></span></div>
+            <span class="delivered"><span class="zh">已送达</span><span class="en">Delivered</span></span>
+          </header>
+
+          <div class="messages">
+            <div class="zh">
+              <div class="bubble user user-one">我是不是还没回小周周五见面的消息？</div>
+              <div class="work work-one">正在查消息和日历</div>
+              <div class="bubble agent agent-one">还没有，他最后问你下午三点行不行。</div>
+              <div class="bubble agent agent-two">你那时有空。要我帮你回吗？</div>
+              <div class="bubble user user-two">好，告诉他可以。</div>
+              <div class="work work-two">回复已发送</div>
+              <div class="bubble agent agent-three">好了。</div>
+            </div>
+
+            <div class="en">
+              <div class="bubble user user-one">Did I reply to Alex about Friday?</div>
+              <div class="work work-one">Checking messages and calendar</div>
+              <div class="bubble agent agent-one">Not yet — Alex asked if 3pm works.</div>
+              <div class="bubble agent agent-two">You’re free then. Want me to reply?</div>
+              <div class="bubble user user-two">Yes, tell him that works.</div>
+              <div class="work work-two">Reply sent</div>
+              <div class="bubble agent agent-three">Done.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

@@ -6,17 +6,15 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
+<a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-readme-en.mp4">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-en.gif" width="900" alt="Human Message: Pi quietly checks messages and replies in natural chat bubbles">
+</a>
+
+<sub>See the whole idea in 8 seconds · click for MP4</sub>
+
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-c9f5be)](LICENSE)
-
-<br>
-
-<a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-promo-en.mp4">
-  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-promo-en.gif" width="540" alt="Human Message English chat demo">
-</a>
-
-<sub>12-second demo · click for the full MP4</sub>
 
 </div>
 
