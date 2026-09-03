@@ -96,7 +96,7 @@ export function createTurnBoundSendMessagePort(
         );
       }
       const receipt = await deliver(request, signal);
-      sentCount += 1;
+      if (!receipt.idempotentReplay) sentCount += 1;
       return receipt;
     },
     reset() {

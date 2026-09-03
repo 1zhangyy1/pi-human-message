@@ -66,6 +66,24 @@ test("turn-bound delivery resumes from already committed messages", async () => 
   assert.deepEqual(delivered, ["second"]);
 });
 
+test("idempotent delivery replay does not consume another message slot", async () => {
+  const delivered: string[] = [];
+  const port = createTurnBoundSendMessagePort(async (request) => {
+    delivered.push(request.text);
+    return {
+      messageId: request.toolCallId,
+      externalMessageIds: [],
+      idempotentReplay: request.text === "replay",
+    };
+  }, { maxMessagesPerTurn: 2, initialSentCount: 1 });
+
+  await port.send({ toolCallId: "call-1", text: "replay" });
+  assert.equal(port.sentCount, 1);
+  await port.send({ toolCallId: "call-2", text: "new" });
+  assert.equal(port.sentCount, 2);
+  assert.deepEqual(delivered, ["replay", "new"]);
+});
+
 test("send_message rejects empty and over-limit bubbles before delivery", async () => {
   let calls = 0;
   const tool = createSendMessageAgentTool(async () => {
