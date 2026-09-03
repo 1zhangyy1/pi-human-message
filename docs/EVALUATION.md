@@ -8,11 +8,13 @@ Run on 2026-09-03 with Pi packages `0.84.4`, the `0.2.2` prompt, adaptive acknow
 
 | Model through OpenRouter | Independent runs | Passed after recovery | Direct delivery | Multi-message turns |
 | --- | ---: | ---: | ---: | ---: |
-| `openai/gpt-5.6-luna` | 56 | 56/56 | 55/56 | 25/56 |
+| `openai/gpt-5.6-luna` | 56 | 56/56 | 55/56 | 26/56 |
 
 The one recovered run initially left its answer in private assistant prose. The host's single recovery pass delivered the answer. No scenario needed a second recovery.
 
-The prompt-tuning target used four natural semantic-boundary scenarios twice each. A static rule alone passed 2/8. Repeating the boundary rule in the per-turn reminder passed 5/8. Adding compact shape examples reached 8/8. A separate short-message and anti-fragment set passed 24/24, so the stronger rule did not turn ordinary replies into message spam.
+The prompt-tuning target used four semantic-boundary scenarios twice each. A static rule alone passed 2/8. Repeating the boundary rule in the per-turn reminder passed 5/8. Adding compact shape examples reached 8/8. A separate short-message and anti-fragment set passed 24/24, so the stronger rule did not turn ordinary replies into message spam.
+
+The everyday-language tool set removes instructions such as “this is quick” or “reply before using tools.” Across 14/14 repeated Luna runs, quick save and refund checks used `tool → message`, while noticeable research used `message → tool → message(s)`. These gates test whether the Agent chooses an appropriate acknowledgement policy from the work itself.
 
 The `0.2.0` package shape was also smoke-tested through the real Pi CLI: Pi loaded `extensions/index.ts`, GPT-5.6 Luna called `send_message` three times, and a local authenticated Webhook received three distinct delivery payloads. Pi emitted no duplicate final prose. This proves the Pi Extension-to-Webhook path, not a production Telegram/WeChat/Feishu account loop.
 

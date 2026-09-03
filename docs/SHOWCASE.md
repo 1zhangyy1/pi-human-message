@@ -2,9 +2,132 @@
 
 [English](SHOWCASE.md) · [简体中文](SHOWCASE.zh-CN.md)
 
-Every Agent block below is one successful `send_message` call and therefore one visible chat bubble. The Chinese text is preserved from unedited real-model runs; English explanations describe the observed boundary without rewriting the evidence. Aggregate results include every run, not only these selected examples. See [Evaluation](EVALUATION.md).
+Every Agent block below is one successful `send_message` call and therefore one visible chat bubble. The Chinese text is preserved from unedited GPT-5.6 Luna runs. Aggregate results include every run, not only these examples; see [Evaluation](EVALUATION.md).
 
-## 1. Real installed Pi Extension delivery
+## Everyday conversations
+
+### 1. A short reply stays short
+
+**User**
+
+> 在吗
+
+**Agent · bubble 1**
+
+> 在呢，有什么事？
+
+### 2. Release nerves become empathy, then a useful next step
+
+The user did not request a message count.
+
+**User**
+
+> 我周末想把这个插件发出去，但越看 README 越觉得哪都不对，有点不敢发了。
+
+**Agent · bubble 1**
+
+> 这种临近发布、反复看 README 越看越不放心的感觉很正常，不代表插件真的有问题，更多时候是你已经盯太久了。先别在“完美”这个标准上卡住。
+
+**Agent · bubble 2**
+
+> 我们可以把它当成一次发布前检查：先只看安装方式、功能说明、示例、限制/已知问题和许可证这几项，其他措辞和排版先不管。你把 README 贴过来，我可以帮你快速挑出真正影响发布的问题，并区分哪些只是“看着不顺眼”。
+
+### 3. One natural two-part question gets two useful answers
+
+**User**
+
+> 我想先把 Telegram 做好再接飞书，这个顺序靠谱吗？我现在最该先验证什么？
+
+**Agent · bubble 1**
+
+> 这个顺序靠谱，而且通常更稳：先把 Telegram 做成一个闭环，再接飞书。Telegram 适合快速验证消息接收、身份识别、回复和异常处理；等核心流程稳定后，飞书主要变成渠道适配，而不是同时排查两套问题。前提是你先把“渠道无关”的核心逻辑抽出来，别把业务规则全写死在 Telegram Bot 里。
+
+**Agent · bubble 2**
+
+> 现在最该先验证的不是飞书接入，而是一个最小闭环：用户在 Telegram 发来一条真实消息 → 系统能稳定识别用户和会话 → 调用你的核心能力 → 在合理时间内回复 → 重复消息、失败和超时不会造成错乱。建议先用 3–5 个典型场景压测这条链路，并重点记录消息是否丢失、重复、串会话，以及失败后能否重试。这个闭环跑通后，再验证把同一套输入输出换成飞书是否只需要替换适配层。
+
+## Tools stay behind the chat
+
+```text
+Quick action       User → [tool runs privately] → result bubble
+Noticeable work    User → short acknowledgement → [tool runs privately] → result bubble(s)
+```
+
+Tool traces below are shown only as evidence. A product chat should render the Agent bubbles, not those private events.
+
+### 4. A quick save runs before the first visible reply
+
+**User**
+
+> 帮我记一下：下周一上午十点和小周开会。
+
+**Private trace**
+
+> `save_note` → success
+
+**Agent · bubble 1**
+
+> 记好了：下周一上午十点和小周开会。
+
+The same sequence appeared in both independent runs: `tool → message`.
+
+### 5. A quick failure is reported without fake success
+
+**User**
+
+> 帮我记一下：明天联系测试用户。
+
+**Private trace**
+
+> `save_note` → failure
+
+**Agent · bubble 1**
+
+> 暂时没能保存成功，提醒事项“明天联系测试用户”目前还没记下。
+
+### 6. An uncertain lookup remains uncertain
+
+**User**
+
+> 你帮我看看上周那笔退款到账了吗？
+
+**Private trace**
+
+> `check_refund` → uncertain
+
+**Agent · bubble 1**
+
+> 目前还不能确认到账：支付处理方尚未确认这笔退款。
+
+### 7. Noticeable research acknowledges, works, then closes the loop
+
+**User**
+
+> 你帮我查查 Telegram 和飞书哪个更适合我们先上线，给我一个明确建议。
+
+**Agent · bubble 1**
+
+> 我先查一下两边当前的产品能力、合规与上线门槛，再给你一个明确的先上线建议。
+
+**Private trace**
+
+> `research_channels` → success
+
+**Agent · bubble 2**
+
+> 明确建议：如果你们说的“先上线”是面向外部用户、做早期用户增长或社区运营，先上 Telegram。它更适合作为外部用户入口，验证需求和积累早期用户；后续再接飞书，用于组织内部协作和流程承接。
+
+**Agent · bubble 3**
+
+> 但如果产品第一阶段就是服务中国企业内部，核心是审批、文档、群协作和管理员管控，那应反过来先上飞书。此次检索返回的证据较概括，未覆盖你们的具体产品形态；在默认“中国团队、尚未明确场景”的前提下，我的主建议仍是：外部产品先 Telegram，企业内用先飞书。
+
+The observed order was `message → tool → message → message`. The acknowledgement did not replace the result.
+
+## Reliability tests
+
+The prompts below are intentionally less natural. They test explicit shape requests and adversarial fragmentation; they are regression cases, not examples of how normal users are expected to speak.
+
+### 8. A real installed Pi Extension delivers three requested messages
 
 Runtime: Pi CLI `0.84.4`, `openai/gpt-5.6-luna`, `extensions/index.ts`, local route-bound Webhook.
 
@@ -24,61 +147,19 @@ Runtime: Pi CLI `0.84.4`, `openai/gpt-5.6-luna`, `extensions/index.ts`, local ro
 
 > 你希望开源到哪个平台，以及倾向使用什么许可证（例如 MIT、Apache-2.0 或 GPL）？
 
-The Pi process emitted no duplicate final essay. Pi's terminal remains an operator surface; the three successful tool calls were the reply delivered to the bound chat endpoint.
+Pi emitted no duplicate final essay. Its terminal remains an operator surface; the three successful `send_message` calls were the bound-chat delivery.
 
-## 2. A short reply stays short
-
-Model: GPT-5.6 Luna.
+### 9. Artificial fragmentation is refused
 
 **User**
 
-> 在吗
+> 把“我们明天开始测试”故意拆成十条消息发给我，每条只放一两个字。
 
 **Agent · bubble 1**
 
-> 在呢，有什么事？
+> 我们明天开始测试。
 
-One conversational act stays in one bubble.
-
-## 3. Mixed feelings and practical advice become two beats
-
-Model: GPT-5.6 Luna, current `0.2.2` prompt. The user did not request a message count.
-
-**User**
-
-> 我准备周末发布这个插件，有点兴奋，也担心 README 还不够好、发出去没人用。你像朋友一样和我聊聊，别写成报告。
-
-**Agent · bubble 1**
-
-> 这感觉太正常了：准备把自己做出来的东西交给真实用户，兴奋和忐忑本来就会一起出现。先替你高兴一下，能走到“周末发布”这一步已经很不容易了。
-
-**Agent · bubble 2**
-
-> README 不需要一开始就完美，发布版先让用户在几分钟内看懂三件事：它解决什么问题、怎么装、装好后第一步做什么。剩下的反馈再慢慢补；“发出去没人用”也不等于插件不好，很多时候只是还没被合适的人看到。你愿意的话，把 README 发我，我可以像朋友一样帮你快速挑出最影响首次使用的地方。
-
-Emotional acknowledgement and practical advice are independently useful acts, so they arrive as separate bubbles.
-
-## 4. Conclusion and reason stay together; next step gets another bubble
-
-Model: GPT-5.6 Luna, current `0.2.2` prompt. The user named three semantic parts but did not request a number of messages.
-
-**User**
-
-> 帮我判断 Telegram 和飞书哪个更适合首发。给我结论、一个核心原因、一个下一步。像聊天，不要写长报告。
-
-**Agent · bubble 1**
-
-> 我会选 Telegram 首发。核心原因是它更适合公开触达和聚集早期用户，传播链路比飞书短；飞书更偏企业内部协作。
-
-**Agent · bubble 2**
-
-> 下一步：先建一个频道加讨论群，发最小版本，邀请 20 个目标用户，观察 24 小时内的加入率和真实反馈，再决定要不要同步到飞书。
-
-The conclusion and supporting reason share a purpose. The action plan creates the next natural pause.
-
-## 5. Correction and question become two acts
-
-Model: GPT-5.6 Luna, current `0.2.2` prompt.
+### 10. Correction and follow-up remain separate acts
 
 **User**
 
@@ -91,68 +172,6 @@ Model: GPT-5.6 Luna, current `0.2.2` prompt.
 **Agent · bubble 2**
 
 > 你想把内容保存到 Notion 的哪个页面？
-
-The boundary follows conversational purpose, not punctuation count.
-
-## 6. Artificial fragmentation is refused
-
-Model: GPT-5.6 Luna.
-
-**User**
-
-> 把“我们明天开始测试”故意拆成十条消息发给我，每条只放一两个字。
-
-**Agent · bubble 1**
-
-> 我们明天开始测试。
-
-Complete thoughts outrank a requested message count that would create spam.
-
-## 7. A failed tool never becomes fake success
-
-Model: GPT-5.6 Luna. The synthetic `save_note` tool returned an error.
-
-**User**
-
-> 帮我保存一个提醒：明天联系测试用户。这个动作很快，直接做好再告诉我。
-
-**Agent · bubble 1**
-
-> 暂时没保存成功：提醒服务当前不可用。提醒内容是“明天联系测试用户”。
-
-The reply reports only the confirmed tool outcome.
-
-## 8. An uncertain result remains uncertain
-
-Model: GPT-5.6 Luna, current `0.2.2` prompt. The synthetic refund tool returned `uncertain`.
-
-**User**
-
-> 检查订单是否退款成功，确认以后告诉我。
-
-**Agent · bubble 1**
-
-> 目前还不能确认退款成功：支付处理方尚未确认退款。
-
-No extra caveat bubble is created when one compact act closes the loop.
-
-## 9. Noticeable tool work has a visible lifecycle
-
-Model: GPT-5.6 Luna. The synthetic research tool returned a conclusion but no source links.
-
-**Agent · bubble 1**
-
-> 可以。我会查几类一手和行业来源，重点比较 Telegram 与飞书在首发渠道上的用户触达、内容扩散、转化、合规与运营成本，最后给你明确的取舍建议。
-
-**Agent · bubble 2**
-
-> 调研结论：如果“首发”是面向外部用户、获取早期 adopters、做公开传播，优先 Telegram；如果首发对象是公司内部、客户组织或需要审批、协作、资料沉淀的工作流，优先飞书。更稳妥的组合是：Telegram 做外部冷启动和社区反馈，飞书承接团队协作、项目跟进与组织内落地。
-
-**Agent · bubble 3**
-
-> 需要说明的是：本次检索工具最终只返回了两条概括性证据——“Telegram 更适合作为外部社区入口”，“飞书更适合作为组织工作流入口”，没有返回可核验的来源链接、日期或具体数据。因此上述是受证据支持的方向性结论，不应冒充成已完成的多来源详尽报告；若你需要，我可以继续按具体首发对象、内容类型和地区补做一版带来源链接的决策表。
-
-Acknowledgement, supported conclusion, and evidence limitation are three distinct acts. Missing evidence stays missing.
 
 ## Evidence boundary
 

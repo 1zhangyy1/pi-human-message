@@ -51,65 +51,84 @@ Each **Agent bubble** below represents a separate `send_message` call. These are
 
 **You**
 
-> I’m excited to release this plugin this weekend, but I’m also worried the README is not good enough and nobody will use it. Talk to me like a friend, not a report.
+> I want to release this plugin this weekend, but the more I read the README, the more everything feels wrong. I’m starting to feel afraid to ship it.
 
 **Agent · bubble 1**
 
-> That feeling is completely normal. Putting something you made in front of real users brings excitement and nerves together. Getting as far as a weekend release is already worth celebrating.
+> That feeling is normal. The closer a README gets to release, the easier it is to notice only what still feels imperfect. It does not mean the plugin is not ready. Do not let “perfect” become the release bar.
 
 **Agent · bubble 2**
 
-> The README does not need to be perfect. The first version only needs to help a new user understand what it solves, install it, and take the first step. Real feedback can shape the rest.
+> Treat this as a release check: look only at installation, what the plugin does, one example, known limits, and the license. Ignore the remaining polish for now.
 
-### 3. A conclusion and its reason stay together; the next step gets room
+### 3. A natural two-part question becomes two useful answers
 
 **You**
 
-> Should Telegram or Feishu be the first launch channel? Give me a conclusion, one reason, and one next step. Keep it conversational.
+> I want to make Telegram solid before adding Feishu. Does that order make sense? What should I validate first?
 
 **Agent · bubble 1**
 
-> I would start with Telegram. It is better suited to public discovery and early-user communities, so the path from hearing about the product to trying it is shorter.
+> That order makes sense. First make one Telegram flow reliable, then reuse the channel-independent core for Feishu. Just avoid burying product rules inside the Telegram bot.
 
 **Agent · bubble 2**
 
-> Next, invite twenty target users into one small launch group and observe whether they join, try the core action, and give useful feedback within the first day.
+> Validate one end-to-end loop first: a real message arrives, the right user and session are identified, the Agent uses the right capability, and the result returns without loss, duplication, or cross-chat leakage.
 
-### 4. A correction and a question are separate acts
+### 4. A quick tool runs quietly, then the result appears
 
 **You**
 
-> Correct me: Notion is not a chat channel. Then ask which page I want to save to.
+> Remember this for me: meeting with Zhou next Monday at 10 a.m.
+
+*Private work · not shown in chat: `save_note` succeeds*
 
 **Agent · bubble 1**
 
-> One correction: Notion is not a chat channel. It is the place where the content is stored.
+> Saved: meeting with Zhou next Monday at 10 a.m.
+
+### 5. An uncertain lookup stays honest
+
+**You**
+
+> Can you check whether last week’s refund has arrived?
+
+*Private work · not shown in chat: `check_refund` returns uncertain*
+
+**Agent · bubble 1**
+
+> I still cannot confirm that it arrived. The payment processor has not confirmed this refund yet.
+
+### 6. Noticeable work gets a brief acknowledgement and a real result
+
+**You**
+
+> Can you look into whether Telegram or Feishu is the better place for us to launch first and give me a clear recommendation?
+
+**Agent · bubble 1**
+
+> I’ll compare the current product capabilities, compliance constraints, and launch requirements, then give you a clear recommendation.
+
+*Private work · not shown in chat: `research_channels` runs*
 
 **Agent · bubble 2**
 
-> Which Notion page would you like to save it to?
+> If the first launch is for external early users and community feedback, start with Telegram. Add Feishu afterward for internal workflows and collaboration.
 
-### 5. A request for spam does not create fragments
+**Agent · bubble 3**
 
-**You**
+> If the first users are Chinese companies using it for internal work, reverse the order and start with Feishu. The available evidence here was directional, so pricing and compliance details still need a sourced comparison.
 
-> Split “we start testing tomorrow” into ten messages with one or two words each.
+More natural conversations and the separate reliability tests are in the [full showcase](docs/SHOWCASE.md).
 
-**Agent · bubble 1**
+## What stays behind the chat
 
-> We start testing tomorrow.
+```text
+Quick action       You → [tool runs privately] → result bubble
+Noticeable work    You → short acknowledgement → [tool runs privately] → result bubble(s)
+```
 
-### 6. An uncertain tool result stays honest and compact
-
-**You**
-
-> Check whether the refund succeeded and tell me after you confirm it.
-
-**Agent · bubble 1**
-
-> I still cannot confirm that the refund succeeded. The payment processor has not confirmed it yet.
-
-More examples cover explicit message counts, tool success and failure, evidence gaps, and noticeable tool work in the [full showcase](docs/SHOWCASE.md).
+Only successful `send_message` calls belong in the end-user conversation. Pi's terminal may still show operator traces; the product host must render the confirmed delivery stream rather than raw assistant text or tool events.
 
 ## How it works
 

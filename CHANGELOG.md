@@ -5,7 +5,8 @@ All notable changes are documented here. The project follows semantic versioning
 ## Unreleased
 
 - Split the repository homepage into dedicated English and Simplified Chinese READMEs.
-- Expand the README and showcase into visual user-to-bubble transcripts with nine real behavior examples.
+- Expand the README and showcase into visual user-to-bubble transcripts with ten real behavior examples.
+- Replace test-shaped showcase prompts with everyday user language and expose private tool ordering as evidence, not end-user UI.
 
 ## 0.2.2 - 2026-09-03
 
