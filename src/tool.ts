@@ -50,6 +50,8 @@ export interface SendMessageToolOptions {
 export interface TurnBoundSendMessageOptions {
   /** Hard delivery cap for one host-defined turn. */
   maxMessagesPerTurn?: number;
+  /** Already committed messages when a durable host resumes the same turn. */
+  initialSentCount?: number;
 }
 
 export interface TurnBoundSendMessagePort {
@@ -74,7 +76,15 @@ export function createTurnBoundSendMessagePort(
   if (!Number.isInteger(maxMessagesPerTurn) || maxMessagesPerTurn < 1 || maxMessagesPerTurn > 8) {
     throw new RangeError("maxMessagesPerTurn must be an integer between 1 and 8");
   }
-  let sentCount = 0;
+  const initialSentCount = options.initialSentCount ?? 0;
+  if (
+    !Number.isInteger(initialSentCount)
+    || initialSentCount < 0
+    || initialSentCount > maxMessagesPerTurn
+  ) {
+    throw new RangeError("initialSentCount must be between 0 and maxMessagesPerTurn");
+  }
+  let sentCount = initialSentCount;
   return {
     get sentCount() {
       return sentCount;
@@ -86,7 +96,7 @@ export function createTurnBoundSendMessagePort(
         );
       }
       const receipt = await deliver(request, signal);
-      sentCount += 1;
+      if (!receipt.idempotentReplay) sentCount += 1;
       return receipt;
     },
     reset() {

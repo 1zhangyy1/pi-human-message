@@ -64,20 +64,21 @@ An IM product already knows the authenticated inbound conversation, so it should
 before_agent_start
   1. reset the delivery counter for the new prompt
   2. append the Human Message system contract
+  3. add a hidden compact turn reminder after the current user prompt
 
 model turn
-  3. reason privately
-  4. call send_message once per complete conversational beat
-  5. receive a host delivery receipt
-  6. use other tools when the user's task requires them
-  7. send a confirmed result, question, or blocker after tool work
+  4. reason privately
+  5. call send_message once per complete conversational beat
+  6. receive a host delivery receipt
+  7. use other tools when the user's task requires them
+  8. send a confirmed result, question, or blocker after tool work
 
 host turn boundary
-  8. inspect visible-message/tool trace
-  9. if needed, run no more than one recovery prompt with the same durable turn identity
+  9. inspect visible-message/tool trace
+  10. if needed, run no more than one recovery prompt with the same durable turn identity
 ```
 
-Pi can produce several low-level model turns while resolving tool calls. The message cap belongs to the person-opened prompt, not to individual token streams. The installable extension resets on `before_agent_start`; an embedded host that runs recovery must keep its own durable turn boundary and avoid treating an infinite retry loop as recovery.
+Pi can produce several low-level model turns while resolving tool calls. The message cap belongs to the person-opened prompt, not to individual token streams. The installable extension resets and injects its hidden reminder on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. A durable host that resumes a turn passes the number of already committed bubbles as `initialSentCount`, so a process retry cannot bypass the turn cap. A host that runs recovery must keep its own durable turn boundary and avoid treating an infinite retry loop as recovery.
 
 ## Module responsibilities
 

@@ -4,6 +4,11 @@ All notable changes are documented here. The project follows semantic versioning
 
 ## Unreleased
 
+## 0.2.3 - 2026-09-04
+
+- Refresh the semantic-boundary reminder automatically on every Pi Extension turn as a hidden custom message.
+- Document the equivalent `withHumanMessageTurnReminder()` step for embedded Agent-core hosts.
+- Let durable hosts seed the hard delivery cap with messages committed before a resumed turn, without charging idempotent replays twice.
 - Split the repository homepage into dedicated English and Simplified Chinese READMEs.
 - Expand the README and showcase into visual user-to-bubble transcripts with ten real behavior examples.
 - Replace test-shaped showcase prompts with everyday user language and expose private tool ordering as evidence, not end-user UI.

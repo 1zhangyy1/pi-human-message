@@ -2,6 +2,7 @@ import type { ExtensionFactory } from "@earendil-works/pi-coding-agent";
 
 import {
   createHumanMessageSystemPrompt,
+  HUMAN_MESSAGE_TURN_REMINDER,
   type HumanMessagePromptOptions,
 } from "./prompt.js";
 import {
@@ -38,7 +39,14 @@ export function createHumanMessageExtension(
     const prompt = createHumanMessageSystemPrompt(options);
     pi.on("before_agent_start", async (event) => {
       delivery.reset();
-      return { systemPrompt: `${event.systemPrompt}\n\n${prompt}` };
+      return {
+        systemPrompt: `${event.systemPrompt}\n\n${prompt}`,
+        message: {
+          customType: "human-message-turn-reminder",
+          content: HUMAN_MESSAGE_TURN_REMINDER,
+          display: false,
+        },
+      };
     });
   };
 }
