@@ -32,7 +32,7 @@ export function createHumanMessageExtension(
       promptSnippet: "Deliver one user-visible chat bubble to the current conversation",
       promptGuidelines: [
         "Use send_message for every user-visible reply; plain assistant text is private.",
-        "Keep one conversational act in one bubble; when the purpose changes and a natural pause belongs between acts, use another send_message call.",
+        "Choose message boundaries by meaning and natural pauses, without a fixed message count or reply template.",
         "Never split text mechanically or create filler just to increase the message count.",
       ],
     });

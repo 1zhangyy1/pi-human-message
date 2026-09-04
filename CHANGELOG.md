@@ -4,6 +4,14 @@ All notable changes are documented here. The project follows semantic versioning
 
 ## Unreleased
 
+## 0.3.0 - 2026-09-04
+
+- Remove default message-count and character limits. Hosts can still opt into explicit limits; exported default constants are now `undefined`.
+- Let the Agent choose message boundaries and timing without required bubble counts, character targets, or conversational templates.
+- Treat delivery inspection as a review hint, not proof of failure. The review prompt allows silence when the outcome was already delivered and forbids repeating external actions.
+- Cover more than eight messages, long answers, resumed turns, failed deliveries, and explicit host-policy compatibility in regression tests.
+- Keep historical model-evaluation claims separate from this release's verification.
+
 ## 0.2.3 - 2026-09-04
 
 - Refresh the semantic-boundary reminder automatically on every Pi Extension turn as a hidden custom message.

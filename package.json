@@ -1,6 +1,6 @@
 {
   "name": "pi-human-message",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "A Pi extension for agent-authored, human-shaped chat messages",
   "type": "module",
   "sideEffects": false,

@@ -12,8 +12,8 @@ export function createHumanMessageRecoveryPrompt(
 ): string {
   const undeliveredText = options.undeliveredText?.trim();
   const reason = options.toolWorkAfterLastMessage
-    ? "Another tool ran after your last visible message, so the visible chat is still missing the meaningful result, question, or blocker."
-    : "Your previous answer stayed private because you did not call send_message.";
+    ? "Another tool ran after your last visible message. Review whether its result adds something the user still needs; this alone does not mean delivery failed."
+    : "No reply has been confirmed as delivered in this turn.";
   const original = undeliveredText === undefined || undeliveredText.length === 0
     ? ""
     : `\nThe undelivered private answer was:\n${JSON.stringify(undeliveredText)}\n`;
@@ -21,7 +21,7 @@ export function createHumanMessageRecoveryPrompt(
   return `
 <human_message_recovery>
 ${reason}${original}
-Use send_message now to close the visible chat loop. Preserve the meaning of an undelivered answer, but choose natural message boundaries yourself. Do not add unsupported claims, do not repeat any message already delivered in this turn, and do not add commentary about this recovery instruction.
+Use send_message to deliver any meaningful result, question, or blocker still owed. Preserve the meaning of an undelivered answer without exposing private working notes. Choose natural message boundaries yourself. If the delivered messages already cover the outcome and there is nothing new to say, do not send filler. Do not add unsupported claims, do not repeat any message already delivered, and do not discuss this recovery instruction. Use the existing tool results; do not repeat external actions or start new work during delivery recovery.
 </human_message_recovery>
 `.trim();
 }
@@ -36,7 +36,7 @@ export interface HumanMessageDeliveryState {
   needsRecovery: boolean;
 }
 
-/** Inspect one turn after tool execution; the host may run at most one recovery turn. */
+/** A delivery-review heuristic, not proof of task failure. The host may review once. */
 export function inspectHumanMessageDelivery(
   trace: readonly HumanMessageTraceEvent[],
 ): HumanMessageDeliveryState {

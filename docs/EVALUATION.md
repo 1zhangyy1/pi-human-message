@@ -2,7 +2,11 @@
 
 `pi-human-message` evaluates visible chat behavior, not general intelligence. Every scenario starts a fresh Pi Agent session and records successful `send_message` deliveries plus non-message tool calls.
 
-## Release snapshot
+## 0.3.0 verification boundary
+
+This release removes default count/length limits and required reply shapes. Its 26 automated tests cover the updated contract, delivery beyond the former limits, resumed delivery, failures, explicit host limits, and review semantics. Scenario-specific evaluation gates are measurements, not runtime restrictions. The historical model results below do not validate this new prompt.
+
+## Historical 0.2.2 snapshot
 
 Run on 2026-09-03 with Pi packages `0.84.4`, the `0.2.2` prompt, adaptive acknowledgements, plain-text output, a four-message turn cap, and a 700-character soft UX ceiling.
 
@@ -69,7 +73,7 @@ Useful environment variables:
 
 Never commit evaluation credentials or raw private-user transcripts.
 
-Deterministic release checks contain 20 tests covering prompt options, semantic delivery guards, recovery inspection, package discovery, inactive/active extension states, Webhook authentication and receipts, and fail-closed endpoint handling.
+Run `pnpm check` for the current deterministic checks: prompt options, delivery behavior, recovery inspection, package discovery, inactive/active extension states, Webhook authentication and receipts, and fail-closed endpoint handling.
 
 ## Interpreting the number
 

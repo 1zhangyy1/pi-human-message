@@ -27,7 +27,7 @@ test("send_message delivers one route-bound bubble and returns its receipt", asy
   assert.match(tool.description, /complete thought/u);
 });
 
-test("turn-bound delivery enforces and resets the hard message cap", async () => {
+test("turn-bound delivery enforces a cap only when explicitly configured", async () => {
   const delivered: string[] = [];
   const controller = createTurnBoundSendMessagePort(async ({ toolCallId, text }) => {
     delivered.push(text);
@@ -44,6 +44,29 @@ test("turn-bound delivery enforces and resets the hard message cap", async () =>
   controller.reset();
   await controller.send({ toolCallId: "4", text: "新一轮" });
   assert.deepEqual(delivered, ["一", "二", "新一轮"]);
+});
+
+test("default delivery has no fixed count or text-length limit, including resumed turns", async () => {
+  const delivered: string[] = [];
+  const port = createTurnBoundSendMessagePort(async (request) => {
+    delivered.push(request.text);
+    return { messageId: request.toolCallId, externalMessageIds: [], idempotentReplay: false };
+  }, { initialSentCount: 10 });
+  const tool = createSendMessageAgentTool(port.send);
+  assert.doesNotMatch(JSON.stringify(tool.parameters), /maxLength/u);
+  for (let i = 0; i < 12; i += 1) {
+    await tool.execute(`call-${i}`, { text: `Section ${i}: ${"detail ".repeat(1000)}` });
+  }
+  assert.equal(delivered.length, 12);
+  assert.equal(port.sentCount, 22);
+});
+
+test("failed delivery is not counted as a delivered message", async () => {
+  const port = createTurnBoundSendMessagePort(async () => {
+    throw new Error("transport unavailable");
+  });
+  await assert.rejects(port.send({ toolCallId: "failed", text: "result" }), /transport unavailable/u);
+  assert.equal(port.sentCount, 0);
 });
 
 test("turn-bound delivery resumes from already committed messages", async () => {

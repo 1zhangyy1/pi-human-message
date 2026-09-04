@@ -25,6 +25,13 @@ test("delivery inspection distinguishes silence, completion, and an unclosed too
   });
 });
 
+test("post-message tool work requests judgment, not a forced apology or repeated action", () => {
+  const prompt = createHumanMessageRecoveryPrompt({ toolWorkAfterLastMessage: true });
+  assert.match(prompt, /this alone does not mean delivery failed/u);
+  assert.match(prompt, /nothing new to say, do not send filler/u);
+  assert.match(prompt, /do not repeat external actions/u);
+});
+
 test("recovery preserves a private answer and forbids invented claims", () => {
   const prompt = createHumanMessageRecoveryPrompt({
     undeliveredText: "原本应该发给用户的回答。",
