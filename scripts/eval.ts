@@ -145,6 +145,7 @@ async function runScenario(options: {
 
   try {
     await agent.prompt(withHumanMessageTurnReminder(scenario.prompt));
+    if (agent.state.errorMessage !== undefined) throw new Error(agent.state.errorMessage);
     const state = inspectHumanMessageDelivery(trace);
     let recovered = false;
     if (state.needsRecovery) {
@@ -152,12 +153,14 @@ async function runScenario(options: {
       const undeliveredText = messages.length === 0
         ? lastAssistantText(agent.state.messages)
         : undefined;
+      agent.state.tools = [sendTool];
       await agent.prompt(createHumanMessageRecoveryPrompt({
         toolWorkAfterLastMessage: state.toolWorkAfterLastMessage,
         ...(undeliveredText === undefined
           ? {}
           : { undeliveredText }),
       }));
+      if (agent.state.errorMessage !== undefined) throw new Error(agent.state.errorMessage);
     }
     const evaluation = evaluateHumanMessages(scenario, messages, trace);
     return {

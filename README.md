@@ -26,7 +26,8 @@ Pi already knows how to call tools and finish work. This plugin handles the last
 
 - Short answers stay short.
 - Background work stays out of the conversation.
-- A new bubble starts only when the conversational purpose changes.
+- Pi chooses when a separate thought or later result deserves another bubble.
+- No fixed message count or character target.
 - Nothing is split mechanically by punctuation or length.
 
 ## What it feels like
@@ -54,7 +55,7 @@ See the [full showcase](docs/SHOWCASE.md) for more examples.
 ## Install
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.2.2
+pi install git:github.com/1zhangyy1/pi-human-message@v0.3.0
 ```
 
 Human Message is not a Telegram, Feishu, or Slack bot. Connect it to the message delivery method your app already uses. See the [integration guide](docs/ARCHITECTURE.md).
@@ -63,18 +64,13 @@ Human Message is not a Telegram, Feishu, or Slack bot. Connect it to the message
 
 1. Gives Pi a `send_message` capability.
 2. Turns each call into one complete chat bubble.
-3. Safely recovers once if Pi forgets to deliver the result.
+3. Offers a delivery-review prompt if Pi forgets to send the result.
 
 Your app still owns channels, recipients, retries, and permissions.
 
 ## Verified
 
-- GPT-5.6 Luna runs: 56 / 56.
-- Tool-loop scenarios: 8 / 8.
-- Automated tests: 20 / 20.
-- Clean remote-tag install with a real Pi CLI: passed.
-
-These are results for the current version, not a claim that every model and chat channel has been tested. Read the [evaluation notes](docs/EVALUATION.md).
+Automated checks cover delivery, Pi extension loading, optional limits, and recovery. Earlier Luna runs and real Pi CLI checks are versioned in the [evaluation notes](docs/EVALUATION.md); they are not proof of this release's new prompt behavior.
 
 ## Develop
 

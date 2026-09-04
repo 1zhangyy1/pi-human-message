@@ -9,7 +9,7 @@ The extension owns:
 - the instruction that `send_message` is the Agent's only visible voice;
 - semantic message-boundary judgment;
 - one route-bound text tool;
-- a hard per-turn message cap;
+- optional host-configured limits, with no default count or character ceiling;
 - delivery receipts;
 - delivery-state inspection and a one-shot recovery prompt;
 - a safe generic Webhook port for the installable Pi package.
@@ -38,7 +38,7 @@ This split prevents the model from selecting a destination and prevents channel 
                                     |
                                     +-------------------+
                                                         |
-Product host -> createHumanMessageExtension({ send }) --+--> prompt + tool + turn guard
+Product host -> createHumanMessageExtension({ send }) --+--> prompt + tool + receipts
 ```
 
 ### Installable Pi package
@@ -78,14 +78,14 @@ host turn boundary
   10. if needed, run no more than one recovery prompt with the same durable turn identity
 ```
 
-Pi can produce several low-level model turns while resolving tool calls. The message cap belongs to the person-opened prompt, not to individual token streams. The installable extension resets and injects its hidden reminder on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. A durable host that resumes a turn passes the number of already committed bubbles as `initialSentCount`, so a process retry cannot bypass the turn cap. A host that runs recovery must keep its own durable turn boundary and avoid treating an infinite retry loop as recovery.
+Pi can produce several low-level model turns while resolving tool calls. There is no default message-count limit. The installable extension resets its delivery counter and injects a hidden reminder on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. Hosts that explicitly configure a cap can use `initialSentCount` to account for already committed messages on resume. A recovery review belongs to the same durable user turn, not a new task or an indefinite retry loop.
 
 ## Module responsibilities
 
 | Module | Responsibility | Must not know about |
 | --- | --- | --- |
 | `prompt.ts` | behavior contract and compact turn reminder | channels, HTTP, credentials |
-| `tool.ts` | Pi tool schema, receipts, hard delivery cap | Telegram/WeChat APIs |
+| `tool.ts` | Pi tool schema, receipts, optional host limits | Telegram/WeChat APIs |
 | `pi-extension.ts` | Pi lifecycle wiring | environment variables, product routing |
 | `webhook.ts` | HTTPS/local transport and receipt validation | model behavior, recipient selection |
 | `recovery.ts` | trace inspection and recovery instruction | retry storage, channel SDKs |
@@ -106,9 +106,9 @@ The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded
 
 ## Why there is no punctuation splitter
 
-Post-generation splitting cannot know which clauses are emotional acknowledgement, explanation, correction, next step, limitation, or question. It also cannot safely undo a bubble that has already been delivered. Human Message makes boundaries part of the Agent's generation action: each tool call must already stand alone as one complete conversational act. A purpose change plus a natural pause creates the next call; punctuation or line breaks do not.
+Post-generation splitting cannot know where a useful conversational pause belongs, and it cannot safely undo an already delivered bubble. Human Message makes boundaries part of the Agent's generation action. A separate thought or later result can deserve another call; closely related sentences can stay together. There is no required template or one-bubble-per-purpose rule.
 
-The 700-character default is a soft UX ceiling, not a target or slicing threshold. The host's `maxMessageChars` remains the actual hard transport guard.
+There is no default character target or ceiling. Hosts can explicitly configure `maxMessageChars` when their delivery port requires one, or handle platform limits in their existing renderer. Empty messages are still rejected.
 
 ## Why there are no built-in channel adapters
 
@@ -126,4 +126,6 @@ That keeps a Telegram reconnect bug from changing WeChat behavior and lets every
 
 The core exposes `inspectHumanMessageDelivery()` and `createHumanMessageRecoveryPrompt()`, but the installable generic Webhook entry does not automatically start a recovery Agent run. Reliable recovery needs a durable product turn id, persisted delivery trace, and host scheduling semantics that a generic Pi package cannot infer safely.
 
-This is intentional. A production host may run one recovery attempt. It must never retry indefinitely or repeat a message already confirmed by the delivery port.
+This is intentional. A production host may run one review using the existing transcript and only the `send_message` tool. It must not re-execute external actions or repeat confirmed messages. Check genuine provider errors before starting a review; do not disguise an outage as a missing message.
+
+`needsRecovery` is a compatibility name for a heuristic: a tool ran after the last message, or nothing was delivered. It does not prove that delivery failed. If the Agent reviews the result and finds nothing new to say, already delivered messages remain valid. Do not append a generic failure just because this flag remains true. A completely silent turn can get an accurate no-answer notice, without instructing the user to repeat potentially completed writes.
