@@ -2,7 +2,32 @@
 
 `pi-human-message` evaluates visible chat behavior, not general intelligence. Every scenario starts a fresh Pi Agent session and records successful `send_message` deliveries plus non-message tool calls.
 
-## 0.3.0 verification boundary
+## 0.4.0 verification boundary
+
+The v0.4 release gate adds deterministic coverage for the default Pi terminal path:
+
+- no-configuration activation in an interactive TUI;
+- no terminal delivery in print, JSON, or RPC modes;
+- safe behavior when `send_message` is disabled or owned by another extension;
+- empty pending rows, confirmed message text, narrow-width wrapping, and visible failures;
+- reconstruction from the persisted tool call and result using Pi's actual `ToolExecutionComponent`;
+- continued selection of Webhook mode when a valid URL is configured, with invalid explicit URLs failing closed.
+
+These checks validate extension wiring and presentation. They do not prove that every model will choose ideal message boundaries, and the component test is not presented as a live-model terminal recording. No new paid-model score is claimed for v0.4 unless it is recorded separately below.
+
+### Live Pi terminal smoke test
+
+Run on 2026-09-05 with Pi `0.84.4` and `openai/gpt-5.6-luna` through OpenRouter. The source extension was loaded temporarily, without a Webhook or any other extension, and only `read` plus `send_message` were enabled.
+
+- A compact request for the package purpose and version produced one complete message.
+- A request with two distinct conversational acts produced two sequential `send_message` calls: the install command first, then where the user would see the effect.
+- The TUI showed only the confirmed message text for those calls: no `send_message` frame, pending placeholder, or receipt JSON appeared.
+- Exiting and reopening the saved session reconstructed both standalone messages with the same presentation.
+- The same extension in `pi -p` mode left `send_message` inactive and returned the ordinary stdout response `OK`.
+
+This is one real CLI/model run, not a claim that every model will always choose the same message boundaries. The temporary session contained only the synthetic README test prompt and was not committed.
+
+## Historical 0.3.0 verification boundary
 
 This release removes default count/length limits and required reply shapes. Its 26 automated tests cover the updated contract, delivery beyond the former limits, resumed delivery, failures, explicit host limits, and review semantics. Scenario-specific evaluation gates are measurements, not runtime restrictions. The historical model results below do not validate this new prompt.
 
@@ -73,7 +98,7 @@ Useful environment variables:
 
 Never commit evaluation credentials or raw private-user transcripts.
 
-Run `pnpm check` for the current deterministic checks: prompt options, delivery behavior, recovery inspection, package discovery, inactive/active extension states, Webhook authentication and receipts, and fail-closed endpoint handling.
+Run `pnpm check` for the current deterministic checks: prompt options, delivery behavior, recovery inspection, package discovery, terminal and non-terminal extension modes, terminal rendering, Webhook authentication and receipts, and fail-closed endpoint handling.
 
 ## Interpreting the number
 

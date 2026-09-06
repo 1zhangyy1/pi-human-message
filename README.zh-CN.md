@@ -7,10 +7,8 @@
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 <a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-readme-zh.mp4">
-  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-zh.gif" width="900" alt="Human Message：Pi 在后台安静完成任务，再用自然的聊天气泡回复">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-zh.gif" width="900" alt="Human Message：Pi 在后台完成任务，再用自然的消息回复">
 </a>
-
-<sub>8 秒看懂它 · 点击观看 MP4</sub>
 
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
@@ -18,57 +16,57 @@
 
 </div>
 
-## 它是什么
+## 安装后直接使用
 
-Human Message 是一个很小的 Pi 插件。
-
-Pi 本来就会调用工具、完成任务。这个插件只解决最后一步：让 Pi 自己判断该发几条、何时回复，以及在哪里自然停顿。
-
-- 简单回答保持简短。
-- 后台动作不会变成聊天噪音。
-- 独立的想法或稍后完成的结果，可以另发一条。
-- 不规定消息条数，也不规定字数目标。
-- 不按标点或字数机械切段。
-
-## 看起来怎样
-
-快速任务做完再回复：
-
-> **你：** 帮我记一下，下周一上午十点和小周开会。
->
-> *Pi 在后台保存提醒。*
->
-> **Pi：** 记好了：下周一上午十点和小周开会。
-
-需要多说一步时，才自然分成两条：
-
-> **你：** 我想发这个插件，但越看 README 越觉得不对，有点不敢发了。
->
-> **Pi：** 这很正常。你不是做得不好，只是已经盯太久了。
->
-> **Pi：** 先只检查安装、示例、限制和许可证，其他先别改。
-
-更多例子见[完整消息集](docs/SHOWCASE.zh-CN.md)。
-
-## 安装
+请使用 Pi 0.84.4 或更新版本。终端接入已在 Pi 0.84.4 和 0.85.0 上验证。
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.3.0
+pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 ```
 
-Human Message 不包含 Telegram、飞书或 Slack 机器人。把它接到你已有的消息发送方法即可，具体方式见[接入说明](docs/ARCHITECTURE.md)。
+启动 Pi；如果 Pi 已经打开，执行一次 `/reload`。这样就可以了，不需要 Webhook、机器人或另一份 API Key。
 
-## 它只做三件事
+在 Pi 的交互式终端里，Agent 会得到一个 `send_message` 工具。每次发送成功，就会干净地显示成一条独立消息；Pi 原本的工具过程和错误仍会正常显示。
 
-1. 给 Pi 一个 `send_message` 能力。
-2. 每次调用发送一个完整聊天气泡。
-3. 如果 Pi 忘记发送结果，提供一次交付检查的提示词。
+> **你：** 看看登录回调为什么失败，顺便修好。
+>
+> *Pi 检查项目并完成修改。*
+>
+> **Pi：** 找到了，是回调地址和配置的域名不一致。
+>
+> **Pi：** 已经修好，登录测试也通过了。
 
-渠道、收件人、重试和权限仍由你的应用负责。
+插件不会在生成后按标点或字数切段。该说一条还是几条、在哪里自然停顿，都由 Agent 根据意思决定。简单回答仍然只说一句，也没有固定条数或字数目标。
 
-## 已验证
+输入 `/human-message` 可以查看终端发送是否生效。默认终端体验只在 Pi 的交互式 TUI 中启用；print、JSON 和 RPC 模式继续保持 Pi 原本的输出方式。
 
-自动化检查覆盖发送、Pi 插件加载、可选限制和交付检查。之前的 Luna 实跑与真实 Pi CLI 验证按版本记录在[评测说明](docs/EVALUATION.md)，不冒充本版新提示词的验证结果。
+## 发到其他聊天应用
+
+Webhook 是给产品接入用的高级模式，不是普通用户安装插件的前置条件：
+
+```bash
+export PI_HUMAN_MESSAGE_WEBHOOK_URL="https://your-app.example/send"
+export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="your-secret" # 可选
+pi
+```
+
+配置有效的 Webhook 地址后，插件会从终端发送切换为原有的定向 Webhook 投递。收件人、鉴权、重试、权限和各渠道 SDK，仍由你的应用负责。
+
+如果产品本身已经嵌入 Pi，可以直接传入现有的发送函数，不需要多绕一层 HTTP。详见[实现说明](docs/ARCHITECTURE.md)。
+
+## 从 v0.3 升级
+
+固定安装在 `@v0.3.0` 的用户不会被自动改变；只有主动安装新版本，才会进入 v0.4。
+
+v0.3 在没有 Webhook 时会保持停用。v0.4 则会默认在 Pi 交互式终端中生效。已经配置了有效 Webhook 的用户，升级后仍然走原来的 Webhook 投递。
+
+## 插件做了什么
+
+- 给 Agent 一个 `send_message` 工具。
+- 让 Agent 在工作过程中自己决定自然的消息边界。
+- 只改变发送成功后的终端展示，不复制一份聊天记录，也不替换 Pi 的终端。
+
+自动化检查覆盖提示词、发送回执、终端展示、恢复会话后的展示、Webhook 校验、可选限制和交付检查。历史实跑结果单独记录在[评测说明](docs/EVALUATION.md)中。
 
 ## 开发
 
@@ -77,7 +75,7 @@ pnpm install
 pnpm check
 ```
 
-[架构](docs/ARCHITECTURE.md) · [贡献指南](CONTRIBUTING.md) · [安全说明](SECURITY.md)
+[更多例子](docs/SHOWCASE.zh-CN.md) · [实现说明](docs/ARCHITECTURE.md) · [安全说明](SECURITY.md) · [贡献指南](CONTRIBUTING.md)
 
 <div align="center">
 

@@ -7,10 +7,8 @@
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 <a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-readme-en.mp4">
-  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-en.gif" width="900" alt="Human Message: Pi quietly checks messages and replies in natural chat bubbles">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-en.gif" width="900" alt="Human Message: Pi quietly checks messages and replies in natural chat messages">
 </a>
-
-<sub>See the whole idea in 8 seconds · click for MP4</sub>
 
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
@@ -18,59 +16,57 @@
 
 </div>
 
-## What it is
+## Install and use
 
-Human Message is a tiny Pi plugin.
-
-Pi already knows how to call tools and finish work. This plugin handles the last step: it lets Pi decide whether a reply needs one message or a few natural chat bubbles.
-
-- Short answers stay short.
-- Background work stays out of the conversation.
-- Pi chooses when a separate thought or later result deserves another bubble.
-- No fixed message count or character target.
-- Nothing is split mechanically by punctuation or length.
-
-## What it feels like
-
-A quick task finishes before the reply:
-
-> **You:** Did I ever reply to Alex about Friday?
->
-> *Pi checks your messages and calendar in the background.*
->
-> **Pi:** No — the thread stopped after Alex asked if 3pm works.
->
-> **Pi:** You’re free then. Want me to reply?
-
-After you confirm, the answer stays simple:
-
-> **You:** Yes, tell him that works.
->
-> *Pi sends the reply.*
->
-> **Pi:** Done.
-
-See the [full showcase](docs/SHOWCASE.md) for more examples.
-
-## Install
+Use Pi 0.84.4 or newer. The terminal integration is tested with Pi 0.84.4 and 0.85.0.
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.3.0
+pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 ```
 
-Human Message is not a Telegram, Feishu, or Slack bot. Connect it to the message delivery method your app already uses. See the [integration guide](docs/ARCHITECTURE.md).
+Start Pi, or run `/reload` if Pi is already open. That is all: no Webhook, bot, or extra API key is required.
 
-## It does three things
+In the interactive Pi terminal, the Agent gets a `send_message` tool. Every successful call appears as one quiet, standalone message. Pi still shows its normal tool work and errors.
 
-1. Gives Pi a `send_message` capability.
-2. Turns each call into one complete chat bubble.
-3. Offers a delivery-review prompt if Pi forgets to send the result.
+> **You:** Check why the login callback is failing and fix it.
+>
+> *Pi inspects the project and makes the change.*
+>
+> **Pi:** Found it — the callback URL did not match the configured origin.
+>
+> **Pi:** I fixed it and the login test now passes.
 
-Your app still owns channels, recipients, retries, and permissions.
+Human Message does not split prose after generation. The Agent decides whether the answer needs one message or a few, based on meaning and natural pauses. Short answers stay short; there is no required message count or character target.
 
-## Verified
+Run `/human-message` to see whether terminal delivery is active. The default terminal experience is enabled only in Pi's interactive TUI; print, JSON, and RPC modes keep their normal output behavior.
 
-Automated checks cover delivery, Pi extension loading, optional limits, and recovery. Earlier Luna runs and real Pi CLI checks are versioned in the [evaluation notes](docs/EVALUATION.md); they are not proof of this release's new prompt behavior.
+## Send to another app
+
+Webhook delivery is an optional advanced mode for products that already know the destination:
+
+```bash
+export PI_HUMAN_MESSAGE_WEBHOOK_URL="https://your-app.example/send"
+export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="your-secret" # optional
+pi
+```
+
+Setting a valid Webhook URL switches the installed extension from terminal delivery to the existing route-bound Webhook. Your application still owns the recipient, authentication, retries, permissions, and channel SDK.
+
+For an embedded Pi host, inject its existing send function directly instead of adding an HTTP hop. See [Architecture](docs/ARCHITECTURE.md).
+
+## Upgrading from v0.3
+
+An install pinned to `@v0.3.0` does not change. It remains on v0.3 until you explicitly install another ref.
+
+In v0.3, an installation without a Webhook stayed inactive. In v0.4, that same setup becomes useful in the interactive Pi terminal. Existing valid Webhook configurations continue to use Webhook delivery.
+
+## What the plugin changes
+
+- It gives the Agent one `send_message` tool.
+- It lets the Agent choose natural message boundaries while it works.
+- It changes only how successful `send_message` calls appear; it does not create another conversation history or replace Pi's terminal.
+
+Automated checks cover prompt behavior, delivery receipts, terminal rendering, resumed display, Webhook validation, optional limits, and recovery. Historical live-model results are kept separately in [Evaluation](docs/EVALUATION.md).
 
 ## Develop
 
@@ -79,7 +75,7 @@ pnpm install
 pnpm check
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Examples](docs/SHOWCASE.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 <div align="center">
 
