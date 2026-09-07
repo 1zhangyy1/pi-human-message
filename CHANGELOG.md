@@ -4,7 +4,7 @@ All notable changes are documented here. The project follows semantic versioning
 
 ## Unreleased
 
-## 0.4.0 - 2026-09-05
+## 0.4.0 - 2026-09-07
 
 - Make the installed package useful without setup: when no Webhook is configured, `send_message` now delivers directly into the interactive Pi terminal.
 - Render each confirmed terminal delivery as a quiet standalone message using Pi's public tool-rendering API. Pending calls and receipt JSON stay hidden; delivery errors remain visible.
