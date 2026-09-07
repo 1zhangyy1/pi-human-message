@@ -13,6 +13,7 @@ The extension owns:
 - delivery receipts;
 - delivery-state inspection and a one-shot recovery prompt;
 - a small native presentation for confirmed messages in Pi's interactive terminal;
+- an unreleased, version-gated chat display with a normal-view fallback;
 - a safe generic Webhook port for the installable Pi package.
 
 The host owns:
@@ -57,13 +58,25 @@ It reads two environment variables:
 
 Without a URL, the package registers `send_message` for Pi's interactive TUI. A successful tool result is rendered as one standalone terminal message. The pending tool call and receipt JSON render as empty rows; a failed result remains visible as an error. `/human-message` reports whether the mode is active.
 
-Terminal mode does not inject another assistant or custom message into the session. Pi already persists the tool call, its arguments, and its result, so the same renderer can reconstruct the message when a session is resumed. Ordinary Pi assistant text remains visible, and the terminal-specific prompt tells the Agent not to repeat a reply it already sent.
+Terminal mode does not inject another assistant or custom message into the session. Pi already persists the tool call, its arguments, and its result, so the same renderer can reconstruct the message when a session is resumed. In released v0.4.0 and in normal view, ordinary Pi assistant text remains visible. The prompt tells the Agent not to repeat a reply it already sent.
 
 The local port is enabled only after an interactive TUI session starts and only while this extension owns the registered `send_message` tool. Print, JSON, and RPC sessions remove it from the active tool set. If the user disabled the tool or another extension owns the same name, Human Message stays inactive rather than claiming a delivery it cannot present.
 
 With a valid URL, it creates a route-bound Webhook port and invokes the same `createHumanMessageExtension()` factory used by embedded hosts.
 
 An explicitly configured but invalid URL never falls back to terminal delivery. That would silently send content to the wrong surface, so invalid remote configuration remains fail-closed.
+
+### Chat display (Unreleased)
+
+The development version enables chat display by default only on a compatible Pi 0.85.1 TUI. Confirmed deliveries from this extension's own `send_message` tool appear immediately; ordinary Agent text and tool execution rows are hidden. Tools still execute normally, with their inputs, results, and session records unchanged. This is not an overlay or another Agent runtime.
+
+`/human-message` and `/human-message status` report the state. `/human-message chat` enables chat display; `/human-message normal` restores the full activity trace without disabling `send_message`. F8 switches between the two views. System notifications, native confirmations, and extension UI are not filtered.
+
+`extensions/chat-display.ts` wraps only the `render` methods of Pi's `AssistantMessageComponent` and `ToolExecutionComponent`. It checks the exact Pi version and original method fingerprints before enabling the wrappers, and checks tool ownership before showing a `send_message` row. These are version-specific compatibility hooks, **not an official stable transcript-filter API**. Unsupported runtimes or conflicting prototype changes leave the original view available. Cleanup removes only wrappers still owned by this extension; it must not overwrite another extension's patch.
+
+Normal view is restored when a third-party custom renderer cannot be safely hidden (even a completed result can contain controls), a tool or model fails, a response is aborted or truncated, or a completed run leaves nonempty ordinary assistant text that would otherwise be hidden. Existing sessions containing ordinary assistant prose or errors also keep normal view so earlier answers and failures do not disappear; use `/new` to start chat view again. Display fallback does not retry a task, change a tool result, or manufacture a replacement answer. Native confirmation UI remains untouched; arbitrary third-party interactive renderers are not claimed to be universally compatible.
+
+This feature is unreleased. The v0.4.0 installation commands and old terminal examples do not demonstrate chat display; the new CLI smoke test is recorded separately in [Evaluation](EVALUATION.md#unreleased-chat-display-verification). Webhook, embedded-host, print, JSON, and RPC behavior is unchanged.
 
 ### Embedded product extension
 
@@ -79,7 +92,7 @@ before_agent_start
 
 model turn
   4. reason privately
-  5. call send_message once per complete conversational beat when a separate message helps
+  5. call send_message for each complete user-visible conversational message
   6. receive a host delivery receipt
   7. use other tools when the user's task requires them
   8. send a confirmed result, question, or blocker after tool work
@@ -99,6 +112,7 @@ Pi can produce several low-level model turns while resolving tool calls. There i
 | `tool.ts` | Pi tool schema, receipts, optional host limits | Telegram/WeChat APIs |
 | `pi-extension.ts` | Pi lifecycle wiring | environment variables, product routing |
 | `extensions/terminal.ts` | confirmed-message rendering in Pi's TUI | external channels, prompt policy |
+| `extensions/chat-display.ts` (unreleased) | version-gated chat display and normal-view fallback | tool execution, result mutation, channel delivery |
 | `webhook.ts` | HTTPS/local transport and receipt validation | model behavior, recipient selection |
 | `recovery.ts` | trace inspection and recovery instruction | retry storage, channel SDKs |
 | `evaluation.ts` | deterministic transcript gates | runtime package entry point |
@@ -116,7 +130,7 @@ In terminal mode, delivery is local and makes no network request. Its stable rec
 
 The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded URL credentials, invalid JSON, and invalid receipts fail closed. The bearer token is read only from environment configuration and is never returned in status output.
 
-“Visible” depends on the selected surface. In a bound external chat, `send_message` is the Agent's delivered voice and plain assistant text remains host-side. In terminal mode, both ordinary assistant text and confirmed `send_message` rows are visible, so the prompt forbids duplicate replies. The extension does not promise to conceal Pi's own tool, assistant, or error output. Product hosts should still render only the confirmed delivery stream to end users and keep operator traces separate.
+“Visible” depends on the selected surface. In a bound external chat, `send_message` is the Agent's delivered voice and plain assistant text remains host-side. In released v0.4.0 and normal terminal view, both ordinary assistant text and confirmed `send_message` rows are visible. The unreleased chat display hides ordinary Agent prose and tool activity but retains system and extension UI, with the safety fallbacks described above. Hidden terminal content remains in the session and is not private or deleted. Product hosts should render only the confirmed delivery stream to end users and keep operator traces separate.
 
 ## Why there is no punctuation splitter
 

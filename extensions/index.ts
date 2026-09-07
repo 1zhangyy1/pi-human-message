@@ -10,6 +10,7 @@ import {
   createTerminalSendMessagePort,
   createTerminalToolPresentation,
 } from "./terminal.js";
+import { registerTerminalChatMode } from "./chat-mode.js";
 
 export const WEBHOOK_URL_ENV = "PI_HUMAN_MESSAGE_WEBHOOK_URL";
 export const WEBHOOK_TOKEN_ENV = "PI_HUMAN_MESSAGE_WEBHOOK_TOKEN";
@@ -23,6 +24,7 @@ export function createInstalledHumanMessageExtension(
 
     if (rawUrl === undefined || rawUrl.length === 0) {
       let sessionMode: PiMode | undefined;
+      registerTerminalChatMode(pi, (mode) => terminalStatus(pi, mode));
       createHumanMessageExtension({
         send: createTerminalSendMessagePort(
           () => sessionMode === "tui"
@@ -33,7 +35,6 @@ export function createInstalledHumanMessageExtension(
         format: "plain_text",
         toolPresentation: createTerminalToolPresentation(),
       })(pi);
-      registerStatus(pi, (ctx) => terminalStatus(pi, ctx.mode));
       pi.on("session_start", async (_event, ctx) => {
         sessionMode = ctx.mode;
         const ownsTool = ownsSendMessage(pi, PI_TERMINAL_TOOL_GUIDELINE);

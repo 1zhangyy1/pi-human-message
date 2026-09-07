@@ -24,7 +24,7 @@ export type HumanMessageToolPresentation = Pick<
 >;
 
 export const PI_TERMINAL_TOOL_GUIDELINE =
-  "Use send_message for separate conversational terminal messages; ordinary assistant text is also visible, so never duplicate a delivered reply.";
+  "Use send_message for every user-facing terminal reply. Chat view hides ordinary assistant prose; never duplicate a delivered reply.";
 export const BOUND_CHAT_TOOL_GUIDELINE =
   "Use send_message for every user-visible reply; plain assistant text is private.";
 

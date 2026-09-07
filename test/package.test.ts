@@ -10,6 +10,9 @@ import {
   PI_TERMINAL_TURN_REMINDER,
 } from "../src/index.js";
 
+const cleanups: Array<() => Promise<void>> = [];
+test.afterEach(async () => { for (const cleanup of cleanups.splice(0)) await cleanup(); });
+
 test("package declares a discoverable Pi extension", async () => {
   const packageJson = JSON.parse(
     await readFile(new URL("../package.json", import.meta.url), "utf8"),
@@ -145,6 +148,8 @@ function createFakePi(initialTools: FakeTool[] = []) {
     registerCommand(name: string) {
       commands.push(name);
     },
+    registerShortcut() {},
+    appendEntry() {},
     on(name: string, handler: unknown) {
       events.push(name);
       const existing = handlers.get(name) ?? [];
@@ -168,6 +173,9 @@ function createFakePi(initialTools: FakeTool[] = []) {
       }));
     },
   } as never;
+  cleanups.push(async () => {
+    for (const handler of handlers.get("session_shutdown") ?? []) await handler({}, {});
+  });
   return {
     pi,
     tools,
@@ -180,7 +188,8 @@ function createFakePi(initialTools: FakeTool[] = []) {
       const context = {
         mode,
         hasUI,
-        ui: { notify() {} },
+        sessionManager: { getBranch: () => [] },
+        ui: { notify() {}, setStatus() {} },
       };
       for (const handler of handlers.get("session_start") ?? []) {
         await handler({ type: "session_start", reason: "new" }, context);
@@ -194,7 +203,8 @@ function createFakePi(initialTools: FakeTool[] = []) {
       return beforeAgentStart?.(event, {
         mode,
         hasUI,
-        ui: { notify() {} },
+        sessionManager: { getBranch: () => [] },
+        ui: { notify() {}, setStatus() {} },
       });
     },
   };

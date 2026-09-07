@@ -120,7 +120,7 @@ export function createSendMessageAgentTool(
   const maxMessageChars = options.maxMessageChars ?? DEFAULT_MAX_MESSAGE_CHARS;
   const parameters = createSendMessageParameters(maxMessageChars);
   const destinationGuidance = deliverySurface === "pi_terminal"
-    ? "A successful call displays the text as one separate message in the current Pi terminal. Pi also displays ordinary assistant text, so do not repeat the same reply after calling this tool."
+    ? "A successful call displays the text as one separate message in the current Pi terminal. Normal view also displays ordinary assistant text; chat view hides it. Use send_message for user-facing replies and never repeat the same reply after calling this tool."
     : "Plain assistant text is private, and the host already binds the destination, so do not provide a channel or recipient.";
   return {
     name: SEND_MESSAGE_TOOL_NAME,

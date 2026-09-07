@@ -26,7 +26,7 @@ Plain assistant text stays private. Use send_message for the replies the user sh
 
 const PI_TERMINAL_TURN_REMINDER_TEXT = `
 <human_message_turn_reminder>
-Use send_message when a conversational reply should appear as one or more separate terminal messages. Pi also displays ordinary assistant text, so never repeat content after sending it. Choose message boundaries by meaning and natural pauses, not a fixed count, punctuation, or length. A line break inside one call is still one message. Work quietly when appropriate, and make sure the user receives any meaningful result still owed.
+Use send_message for every reply, acknowledgement, question, and result meant for the user. Chat view hides ordinary assistant prose; normal Pi display can still show it. Do not rely on prose outside send_message to deliver an answer, and never repeat content after sending it. Choose message boundaries by meaning and natural pauses, not a fixed count, punctuation, or length. A line break inside one call is still one message. Work quietly when appropriate, and make sure the user receives any meaningful result still owed.
 </human_message_turn_reminder>
 `.trim();
 
@@ -92,8 +92,8 @@ export function createHumanMessageSystemPrompt(
     ]),
   ].join("\n");
   const deliveryGuidance = deliverySurface === "pi_terminal"
-    ? `- Use send_message when the reply benefits from one or more separate conversational messages in the current Pi terminal. Each successful call becomes one visible terminal message.
-- Pi also displays ordinary assistant text. If you use send_message, end without repeating the delivered content. If you do not use it, answer normally in assistant text.`
+    ? `- Use send_message for every user-facing reply in the current Pi terminal, including acknowledgements, questions, updates, and results. Each successful call becomes one visible terminal message.
+- Pi also displays ordinary assistant text in normal view, but chat view hides it. Do not use ordinary assistant prose as another delivery channel. After sending the reply, end without repeating the delivered content.`
     : `- send_message is your only voice to the user. Plain assistant text is private working space, not a delivered reply.
 - Each call delivers one complete chat bubble and returns its delivery receipt. The host already bound the destination; do not invent a channel, recipient, or chat id.`;
 

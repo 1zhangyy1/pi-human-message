@@ -11,3 +11,15 @@ from these MIT-licensed projects:
 
 Those reference prompts are used only as reproducible comparison baselines.
 They are not claimed to be xAI's private production prompts.
+
+The unreleased terminal chat-display design also draws on implementation
+lessons from these MIT-licensed community projects:
+
+- Kevin Vargas, pi-quiet-activity
+  https://github.com/kevinvargasl/pi-quiet-activity/tree/51fc7979df7b2e7df044a1ce4cd90701c4cb6347
+- leblancfg, pi-quiet-tools
+  https://github.com/leblancfg/pi-quiet-tools/tree/a0fbdffabbbcdaa610d77b80ade305f0b6f9ab6a
+
+These are design references, not copied source code or upstream endorsements.
+In particular, display filtering stays separate from tool execution, and
+compatibility failures preserve the original view.

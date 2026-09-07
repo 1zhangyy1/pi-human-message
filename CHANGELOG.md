@@ -4,6 +4,11 @@ All notable changes are documented here. The project follows semantic versioning
 
 ## Unreleased
 
+- Add a default chat display for compatible Pi 0.85.1 terminals: show confirmed Human Message deliveries immediately while keeping ordinary Agent prose and tool activity out of the conversation. Normal view keeps the same message tool and restores the activity trace.
+- Add `/human-message chat|normal|status` and an F8 toggle; the bare `/human-message` command still reports status.
+- Gate the display compatibility layer on the exact Pi version and verified ESM/CLI renderer fingerprints. Restore normal view for incompatible or conflicting renderers, unknown custom tool UI, errors, truncated or aborted responses, otherwise hidden assistant answers, and existing sessions with ordinary assistant prose or errors. Keep system and extension UI available, and preserve all tool execution and session data.
+- Leave Webhook, embedded-host, and noninteractive behavior unchanged. Keep the public v0.4.0 installation instructions separate from this unreleased feature. Record 86 passing checks and a real Pi 0.85.1 CLI smoke test in `docs/EVALUATION.md`.
+
 ## 0.4.0 - 2026-09-07
 
 - Make the installed package useful without setup: when no Webhook is configured, `send_message` now delivers directly into the interactive Pi terminal.
