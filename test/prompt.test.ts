@@ -3,7 +3,9 @@ import test from "node:test";
 
 import {
   createHumanMessageSystemPrompt,
+  createHumanMessageTurnReminder,
   HUMAN_MESSAGE_TURN_REMINDER,
+  PI_TERMINAL_TURN_REMINDER,
   withHumanMessageTurnReminder,
 } from "../src/index.js";
 
@@ -45,10 +47,26 @@ test("prompt exposes intentional acknowledgement profiles", () => {
   );
 });
 
+test("terminal prompt uses send_message without hiding ordinary Pi output", () => {
+  const prompt = createHumanMessageSystemPrompt({ deliverySurface: "pi_terminal" });
+  assert.match(prompt, /separate conversational messages in the current Pi terminal/u);
+  assert.match(prompt, /Pi also displays ordinary assistant text/u);
+  assert.doesNotMatch(prompt, /only voice to the user|private working space/u);
+  assert.equal(
+    createHumanMessageTurnReminder({ deliverySurface: "pi_terminal" }),
+    PI_TERMINAL_TURN_REMINDER,
+  );
+  assert.doesNotMatch(PI_TERMINAL_TURN_REMINDER, /stays private/u);
+});
+
 test("prompt options fail closed", () => {
   assert.throws(
     () => createHumanMessageSystemPrompt({ maxMessagesPerTurn: 0 }),
     /positive safe integer/u,
+  );
+  assert.throws(
+    () => createHumanMessageSystemPrompt({ deliverySurface: "browser" as never }),
+    /deliverySurface/u,
   );
   assert.throws(
     () => createHumanMessageSystemPrompt({ acknowledgement: "sometimes" as never }),

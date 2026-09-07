@@ -2,15 +2,13 @@
 
 # Human Message
 
-**Let Pi do the work, then reply like it belongs in chat.**
+**Let Pi work. Get the result as natural chat messages.**
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 <a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-readme-en.mp4">
-  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-en.gif" width="900" alt="Human Message: Pi quietly checks messages and replies in natural chat bubbles">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-en.gif" width="900" alt="Human Message: Pi quietly checks messages and replies in natural chat messages">
 </a>
-
-<sub>See the whole idea in 8 seconds · click for MP4</sub>
 
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
@@ -18,59 +16,57 @@
 
 </div>
 
-## What it is
+Human Message gives the agent one `send_message` tool. One call is one message; the agent decides where a real conversational pause belongs.
 
-Human Message is a tiny Pi plugin.
+## A real Pi terminal run
 
-Pi already knows how to call tools and finish work. This plugin handles the last step: it lets Pi decide whether a reply needs one message or a few natural chat bubbles.
+This transcript was reconstructed from a real Pi run. Pi read the README, then shared the install method as two natural messages:
 
-- Short answers stay short.
-- Background work stays out of the conversation.
-- Pi chooses when a separate thought or later result deserves another bubble.
-- No fixed message count or character target.
-- Nothing is split mechanically by punctuation or length.
+```text
+you › Read README.md. I want to share this plugin with a friend. First send
+      the shortest install command as its own message. After it succeeds,
+      send another message explaining where the effect appears. Keep both
+      conversational, with no headings or numbers. Do not modify files.
 
-## What it feels like
+Pi  │ read README.md
+    │
+Pi  │ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+    │
+Pi  └ Restart Pi, or run /reload in an open session. You will see the effect
+      in the interactive Pi terminal, with every sent message shown separately.
+```
 
-A quick task finishes before the reply:
-
-> **You:** Did I ever reply to Alex about Friday?
->
-> *Pi checks your messages and calendar in the background.*
->
-> **Pi:** No — the thread stopped after Alex asked if 3pm works.
->
-> **Pi:** You’re free then. Want me to reply?
-
-After you confirm, the answer stays simple:
-
-> **You:** Yes, tell him that works.
->
-> *Pi sends the reply.*
->
-> **Pi:** Done.
-
-See the [full showcase](docs/SHOWCASE.md) for more examples.
+The recorded run used Pi 0.84.4 and GPT-5.6 Luna. The two replies were two real `send_message` calls, with no duplicate final answer, and they remained separate after session resume. The terminal layout was reconstructed from the session record; this English transcript translates the original Chinese task and replies. In another real run, one cohesive answer stayed as one message—the plugin does not split merely for effect. [See the verification record](docs/EVALUATION.md).
 
 ## Install
 
+If you do not have [Pi](https://pi.dev/docs/latest) yet:
+
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.3.0
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 ```
 
-Human Message is not a Telegram, Feishu, or Slack bot. Connect it to the message delivery method your app already uses. See the [integration guide](docs/ARCHITECTURE.md).
+Then install Human Message:
 
-## It does three things
+```bash
+pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+```
 
-1. Gives Pi a `send_message` capability.
-2. Turns each call into one complete chat bubble.
-3. Offers a delivery-review prompt if Pi forgets to send the result.
+Run `pi`. On first use, enter `/login` in Pi to choose a model provider. If Pi is already open, run `/reload` after installation. Use `/human-message` to confirm that delivery is active.
 
-Your app still owns channels, recipients, retries, and permissions.
+Use Pi 0.84.4 or newer. Human Message itself needs no Webhook, bot, or separate API key.
 
-## Verified
+## Add it to your product
 
-Automated checks cover delivery, Pi extension loading, optional limits, and recovery. Earlier Luna runs and real Pi CLI checks are versioned in the [evaluation notes](docs/EVALUATION.md); they are not proof of this release's new prompt behavior.
+To use Human Message in Telegram, WeChat, Feishu, or another product, connect it to the product's existing message sender. See [Architecture](docs/ARCHITECTURE.md) for integration details.
+
+## How it works
+
+```text
+Your task → Pi does the work with tools → agent calls send_message → one or more natural messages appear
+```
+
+It does not split finished prose by punctuation or character count, and it does not require a fixed number of messages. Pi's normal tool work and errors remain visible.
 
 ## Develop
 
@@ -79,7 +75,7 @@ pnpm install
 pnpm check
 ```
 
-[Architecture](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+[Examples](docs/SHOWCASE.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/EVALUATION.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
 
 <div align="center">
 

@@ -4,6 +4,16 @@ All notable changes are documented here. The project follows semantic versioning
 
 ## Unreleased
 
+## 0.4.0 - 2026-09-07
+
+- Make the installed package useful without setup: when no Webhook is configured, `send_message` now delivers directly into the interactive Pi terminal.
+- Render each confirmed terminal delivery as a quiet standalone message using Pi's public tool-rendering API. Pending calls and receipt JSON stay hidden; delivery errors remain visible.
+- Keep terminal delivery inactive in print, JSON, and RPC modes, when `send_message` is disabled, or when another extension owns the same tool name.
+- Preserve the existing Webhook and embedded-host paths. A valid explicit Webhook still selects remote delivery, while an invalid explicit URL fails closed instead of falling back to the terminal.
+- Use terminal-specific prompt guidance that acknowledges Pi's ordinary assistant text is visible and prevents duplicate replies.
+- Declare `@earendil-works/pi-tui` as a direct host-provided peer and cover pending, confirmed, narrow-width, failure, and restored-result rendering with Pi's real tool component.
+- Rewrite the English and Chinese READMEs around the install-and-use terminal experience, with Webhook documented as an advanced product integration.
+
 ## 0.3.0 - 2026-09-04
 
 - Remove default message-count and character limits. Hosts can still opt into explicit limits; exported default constants are now `undefined`.

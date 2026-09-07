@@ -1,5 +1,6 @@
 export type HumanMessageFormat = "plain_text" | "markdown";
 export type HumanMessageAcknowledgement = "adaptive" | "always_before_tools" | "results_only";
+export type HumanMessageDeliverySurface = "bound_chat" | "pi_terminal";
 
 export interface HumanMessagePromptOptions {
   /** Optional host policy. No message-count limit is imposed by default. */
@@ -10,17 +11,38 @@ export interface HumanMessagePromptOptions {
   acknowledgement?: HumanMessageAcknowledgement;
   /** Optional length preference, never a slicing rule. No default target. */
   preferredMaxMessageChars?: number;
+  /** Where successful send_message calls become visible. */
+  deliverySurface?: HumanMessageDeliverySurface;
 }
 
 export const DEFAULT_MAX_MESSAGES_PER_TURN = undefined;
 export const DEFAULT_PREFERRED_MAX_MESSAGE_CHARS = undefined;
 
-/** A compact reminder; it does not prescribe a message count or reply template. */
-export const HUMAN_MESSAGE_TURN_REMINDER = `
+const BOUND_CHAT_TURN_REMINDER = `
 <human_message_turn_reminder>
 Plain assistant text stays private. Use send_message for the replies the user should see. Choose message boundaries by meaning and natural pauses, not a fixed count, punctuation, or length. A line break inside one call is still one bubble. Work quietly when appropriate, and deliver any meaningful result the user is still waiting for without repeating what was already sent.
 </human_message_turn_reminder>
 `.trim();
+
+const PI_TERMINAL_TURN_REMINDER_TEXT = `
+<human_message_turn_reminder>
+Use send_message when a conversational reply should appear as one or more separate terminal messages. Pi also displays ordinary assistant text, so never repeat content after sending it. Choose message boundaries by meaning and natural pauses, not a fixed count, punctuation, or length. A line break inside one call is still one message. Work quietly when appropriate, and make sure the user receives any meaningful result still owed.
+</human_message_turn_reminder>
+`.trim();
+
+/** A compact reminder; it does not prescribe a message count or reply template. */
+export const HUMAN_MESSAGE_TURN_REMINDER = BOUND_CHAT_TURN_REMINDER;
+
+/** The truthful reminder used by the interactive Pi terminal profile. */
+export const PI_TERMINAL_TURN_REMINDER = PI_TERMINAL_TURN_REMINDER_TEXT;
+
+export function createHumanMessageTurnReminder(
+  options: Pick<HumanMessagePromptOptions, "deliverySurface"> = {},
+): string {
+  return options.deliverySurface === "pi_terminal"
+    ? PI_TERMINAL_TURN_REMINDER
+    : HUMAN_MESSAGE_TURN_REMINDER;
+}
 
 /** Keep untrusted user text intact and append the host-authored delivery reminder. */
 export function withHumanMessageTurnReminder(userText: string): string {
@@ -31,6 +53,10 @@ export function createHumanMessageSystemPrompt(
   options: HumanMessagePromptOptions = {},
 ): string {
   const { maxMessagesPerTurn, preferredMaxMessageChars } = options;
+  const deliverySurface = options.deliverySurface ?? "bound_chat";
+  if (deliverySurface !== "bound_chat" && deliverySurface !== "pi_terminal") {
+    throw new TypeError("deliverySurface must be bound_chat or pi_terminal");
+  }
   if (maxMessagesPerTurn !== undefined
     && (!Number.isSafeInteger(maxMessagesPerTurn) || maxMessagesPerTurn < 1)) {
     throw new RangeError("maxMessagesPerTurn must be a positive safe integer");
@@ -65,12 +91,16 @@ export function createHumanMessageSystemPrompt(
       `The host prefers messages under about ${preferredMaxMessageChars} characters when practical. Condense or reorganize by meaning, never cut text at a character boundary.`,
     ]),
   ].join("\n");
+  const deliveryGuidance = deliverySurface === "pi_terminal"
+    ? `- Use send_message when the reply benefits from one or more separate conversational messages in the current Pi terminal. Each successful call becomes one visible terminal message.
+- Pi also displays ordinary assistant text. If you use send_message, end without repeating the delivered content. If you do not use it, answer normally in assistant text.`
+    : `- send_message is your only voice to the user. Plain assistant text is private working space, not a delivered reply.
+- Each call delivers one complete chat bubble and returns its delivery receipt. The host already bound the destination; do not invent a channel, recipient, or chat id.`;
 
   return `
 <human_message>
 Visible delivery:
-- send_message is your only voice to the user. Plain assistant text is private working space, not a delivered reply.
-- Each call delivers one complete chat bubble and returns its delivery receipt. The host already bound the destination; do not invent a channel, recipient, or chat id.
+${deliveryGuidance}
 - After delivery, do not repeat the same content in plain assistant text or another message.
 
 Natural conversation:

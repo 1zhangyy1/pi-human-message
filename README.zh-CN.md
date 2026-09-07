@@ -2,15 +2,13 @@
 
 # Human Message · 拟人发消息
 
-**让 Pi 做完事以后，像聊天一样回复你。**
+**让 Pi 做事，用聊天的方式告诉你结果。**
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 <a href="https://github.com/1zhangyy1/pi-human-message/blob/main/assets/human-message-readme-zh.mp4">
-  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-zh.gif" width="900" alt="Human Message：Pi 在后台安静完成任务，再用自然的聊天气泡回复">
+  <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-zh.gif" width="900" alt="Human Message：Pi 在后台完成任务，再用自然的消息回复">
 </a>
-
-<sub>8 秒看懂它 · 点击观看 MP4</sub>
 
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
@@ -18,57 +16,56 @@
 
 </div>
 
-## 它是什么
+Human Message 给 Agent 一个 `send_message` 工具。一次调用就是一条消息；该说一条还是几条，由 Agent 根据意思决定。
 
-Human Message 是一个很小的 Pi 插件。
+## 在真实 Pi 终端里
 
-Pi 本来就会调用工具、完成任务。这个插件只解决最后一步：让 Pi 自己判断该发几条、何时回复，以及在哪里自然停顿。
+下面根据一次真实运行整理。Pi 先读取 README，再把安装方法自然地分成两条消息：
 
-- 简单回答保持简短。
-- 后台动作不会变成聊天噪音。
-- 独立的想法或稍后完成的结果，可以另发一条。
-- 不规定消息条数，也不规定字数目标。
-- 不按标点或字数机械切段。
+```text
+你 › 请读一下 README.md。我要把这个插件发给朋友：请先单独发出
+     最短安装命令；发送成功后，再单独发一条说明安装后在哪里看到
+     效果。两条都像正常聊天，不加标题或编号。不要修改文件。
 
-## 看起来怎样
+Pi │ 读取 README.md
+   │
+Pi │ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+   │
+Pi └ 安装后重启 Pi，或在已打开的 Pi 里运行 /reload；在交互式
+     Pi 终端中就能看到效果，插件发出的每条消息会作为独立消息显示。
+```
 
-快速任务做完再回复：
-
-> **你：** 帮我记一下，下周一上午十点和小周开会。
->
-> *Pi 在后台保存提醒。*
->
-> **Pi：** 记好了：下周一上午十点和小周开会。
-
-需要多说一步时，才自然分成两条：
-
-> **你：** 我想发这个插件，但越看 README 越觉得不对，有点不敢发了。
->
-> **Pi：** 这很正常。你不是做得不好，只是已经盯太久了。
->
-> **Pi：** 先只检查安装、示例、限制和许可证，其他先别改。
-
-更多例子见[完整消息集](docs/SHOWCASE.zh-CN.md)。
+这次实跑使用 Pi 0.84.4 和 GPT-5.6 Luna。两条回复来自两次真实的 `send_message` 调用，没有重复的最终回答；恢复会话后也仍然是两条消息。上面的终端样式根据 session 记录重排，用户任务和 Pi 回复保持原文。另一次只需要一个完整回答的实跑仅发送了一条，插件不会为了凑效果强行拆分。[查看验证记录](docs/EVALUATION.md)
 
 ## 安装
 
+还没有 [Pi](https://pi.dev/docs/latest)：
+
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.3.0
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 ```
 
-Human Message 不包含 Telegram、飞书或 Slack 机器人。把它接到你已有的消息发送方法即可，具体方式见[接入说明](docs/ARCHITECTURE.md)。
+然后安装 Human Message：
 
-## 它只做三件事
+```bash
+pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+```
 
-1. 给 Pi 一个 `send_message` 能力。
-2. 每次调用发送一个完整聊天气泡。
-3. 如果 Pi 忘记发送结果，提供一次交付检查的提示词。
+运行 `pi`。第一次使用可以在 Pi 中输入 `/login` 登录模型；如果 Pi 已经打开，安装后输入 `/reload`。再输入 `/human-message`，即可确认插件已经生效。
 
-渠道、收件人、重试和权限仍由你的应用负责。
+请使用 Pi 0.84.4 或更新版本。Human Message 本身不需要 Webhook、机器人或另一份 API Key。
 
-## 已验证
+## 接进自己的产品
 
-自动化检查覆盖发送、Pi 插件加载、可选限制和交付检查。之前的 Luna 实跑与真实 Pi CLI 验证按版本记录在[评测说明](docs/EVALUATION.md)，不冒充本版新提示词的验证结果。
+要把 Human Message 接进 Telegram、微信、飞书或其他产品，只需连接产品已有的消息发送能力。具体接入方式见[实现说明](docs/ARCHITECTURE.md)。
+
+## 怎么工作
+
+```text
+你提出任务 → Pi 使用工具完成工作 → Agent 调用 send_message → 显示一条或几条自然消息
+```
+
+它不会把生成好的长段落按标点或字数硬切开，也不要求固定发送几条。Pi 原本的工具过程和错误仍会正常显示。
 
 ## 开发
 
@@ -77,7 +74,7 @@ pnpm install
 pnpm check
 ```
 
-[架构](docs/ARCHITECTURE.md) · [贡献指南](CONTRIBUTING.md) · [安全说明](SECURITY.md)
+[更多例子](docs/SHOWCASE.zh-CN.md) · [实现说明](docs/ARCHITECTURE.md) · [验证记录](docs/EVALUATION.md) · [更新记录](CHANGELOG.md) · [安全说明](SECURITY.md)
 
 <div align="center">
 

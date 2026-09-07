@@ -27,6 +27,17 @@ test("send_message delivers one route-bound bubble and returns its receipt", asy
   assert.match(tool.description, /complete thought/u);
 });
 
+test("terminal tool description is truthful about ordinary assistant output", () => {
+  const tool = createSendMessageAgentTool(async ({ toolCallId }) => ({
+    messageId: toolCallId,
+    externalMessageIds: [],
+    idempotentReplay: false,
+  }), {}, "pi_terminal");
+  assert.match(tool.description, /current Pi terminal/u);
+  assert.match(tool.description, /ordinary assistant text/u);
+  assert.doesNotMatch(tool.description, /Plain assistant text is private/u);
+});
+
 test("turn-bound delivery enforces a cap only when explicitly configured", async () => {
   const delivered: string[] = [];
   const controller = createTurnBoundSendMessagePort(async ({ toolCallId, text }) => {

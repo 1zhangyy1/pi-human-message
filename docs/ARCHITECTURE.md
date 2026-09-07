@@ -1,17 +1,18 @@
 # Architecture
 
-Human Message has one behavior core and two assembly paths. It deliberately does not contain a generic channel framework.
+Human Message has one behavior core and three ways to present a delivered message: the interactive Pi terminal, an optional Webhook, or a send function supplied by an embedded host. It deliberately does not contain a generic channel framework.
 
 ## The product boundary
 
 The extension owns:
 
-- the instruction that `send_message` is the Agent's only visible voice;
+- truthful instructions for the selected delivery surface;
 - semantic message-boundary judgment;
-- one route-bound text tool;
+- one text-only `send_message` tool whose destination is fixed by the selected surface;
 - optional host-configured limits, with no default count or character ceiling;
 - delivery receipts;
 - delivery-state inspection and a one-shot recovery prompt;
+- a small native presentation for confirmed messages in Pi's interactive terminal;
 - a safe generic Webhook port for the installable Pi package.
 
 The host owns:
@@ -26,19 +27,23 @@ The host owns:
 
 This split prevents the model from selecting a destination and prevents channel concerns from leaking into conversational judgment.
 
-## Two entry points, one core
+## One core, three delivery paths
 
 ```text
                          package.json pi.extensions
                                     |
                                     v
                          extensions/index.ts
-                                    |
-                         createWebhookSendMessagePort
-                                    |
-                                    +-------------------+
-                                                        |
-Product host -> createHumanMessageExtension({ send }) --+--> prompt + tool + receipts
+                           /                 \
+                   no Webhook             valid Webhook
+                       |                        |
+               terminal port + renderer     Webhook port
+                           \                 /
+                            createHumanMessageExtension
+                                      |
+                              prompt + tool + receipts
+
+Embedded host -> createHumanMessageExtension({ send })
 ```
 
 ### Installable Pi package
@@ -47,16 +52,22 @@ Product host -> createHumanMessageExtension({ send }) --+--> prompt + tool + rec
 
 It reads two environment variables:
 
-- `PI_HUMAN_MESSAGE_WEBHOOK_URL`, required to activate delivery;
+- `PI_HUMAN_MESSAGE_WEBHOOK_URL`, optional; when present, it selects Webhook delivery;
 - `PI_HUMAN_MESSAGE_WEBHOOK_TOKEN`, optional bearer authentication.
 
-Without a URL, the extension registers only `/human-message` status and stays inactive. It does not modify the system prompt or register `send_message`. This fail-closed state avoids breaking ordinary Pi conversations after an incomplete installation.
+Without a URL, the package registers `send_message` for Pi's interactive TUI. A successful tool result is rendered as one standalone terminal message. The pending tool call and receipt JSON render as empty rows; a failed result remains visible as an error. `/human-message` reports whether the mode is active.
+
+Terminal mode does not inject another assistant or custom message into the session. Pi already persists the tool call, its arguments, and its result, so the same renderer can reconstruct the message when a session is resumed. Ordinary Pi assistant text remains visible, and the terminal-specific prompt tells the Agent not to repeat a reply it already sent.
+
+The local port is enabled only after an interactive TUI session starts and only while this extension owns the registered `send_message` tool. Print, JSON, and RPC sessions remove it from the active tool set. If the user disabled the tool or another extension owns the same name, Human Message stays inactive rather than claiming a delivery it cannot present.
 
 With a valid URL, it creates a route-bound Webhook port and invokes the same `createHumanMessageExtension()` factory used by embedded hosts.
 
+An explicitly configured but invalid URL never falls back to terminal delivery. That would silently send content to the wrong surface, so invalid remote configuration remains fail-closed.
+
 ### Embedded product extension
 
-An IM product already knows the authenticated inbound conversation, so it should inject a JavaScript `SendMessagePort` directly. Pi's SDK accepts this factory through `DefaultResourceLoader.extensionFactories`. No HTTP hop or duplicated prompt is required.
+An IM product already knows the authenticated inbound conversation, so it should inject a JavaScript `SendMessagePort` directly. Pi's SDK accepts this factory through `DefaultResourceLoader.extensionFactories`. No HTTP hop or duplicated prompt is required. `bound_chat` remains the default delivery surface for this programmatic API, so existing embedded integrations keep their behavior.
 
 ## Turn lifecycle
 
@@ -68,7 +79,7 @@ before_agent_start
 
 model turn
   4. reason privately
-  5. call send_message once per complete conversational beat
+  5. call send_message once per complete conversational beat when a separate message helps
   6. receive a host delivery receipt
   7. use other tools when the user's task requires them
   8. send a confirmed result, question, or blocker after tool work
@@ -78,7 +89,7 @@ host turn boundary
   10. if needed, run no more than one recovery prompt with the same durable turn identity
 ```
 
-Pi can produce several low-level model turns while resolving tool calls. There is no default message-count limit. The installable extension resets its delivery counter and injects a hidden reminder on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. Hosts that explicitly configure a cap can use `initialSentCount` to account for already committed messages on resume. A recovery review belongs to the same durable user turn, not a new task or an indefinite retry loop.
+Pi can produce several low-level model turns while resolving tool calls. There is no default message-count limit. The installable extension resets its delivery counter and injects the reminder for the active surface on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. Hosts that explicitly configure a cap can use `initialSentCount` to account for already committed messages on resume. A recovery review belongs to the same durable user turn, not a new task or an indefinite retry loop.
 
 ## Module responsibilities
 
@@ -87,6 +98,7 @@ Pi can produce several low-level model turns while resolving tool calls. There i
 | `prompt.ts` | behavior contract and compact turn reminder | channels, HTTP, credentials |
 | `tool.ts` | Pi tool schema, receipts, optional host limits | Telegram/WeChat APIs |
 | `pi-extension.ts` | Pi lifecycle wiring | environment variables, product routing |
+| `extensions/terminal.ts` | confirmed-message rendering in Pi's TUI | external channels, prompt policy |
 | `webhook.ts` | HTTPS/local transport and receipt validation | model behavior, recipient selection |
 | `recovery.ts` | trace inspection and recovery instruction | retry storage, channel SDKs |
 | `evaluation.ts` | deterministic transcript gates | runtime package entry point |
@@ -96,13 +108,15 @@ Pi can produce several low-level model turns while resolving tool calls. There i
 
 ## Delivery protocol
 
-One successful `send_message` tool call maps to one host delivery request. The payload contains only protocol version, tool-call id, and text.
+In Webhook and embedded-host modes, one successful `send_message` tool call maps to one host delivery request. The Webhook payload contains only protocol version, tool-call id, and text.
 
 The host returns a stable internal `messageId`, zero or more platform ids, and whether the request was an idempotent replay. HTTP error responses and malformed receipts fail the tool. The adapter never treats an unconfirmed response as success.
 
+In terminal mode, delivery is local and makes no network request. Its stable receipt is derived from the tool-call id. The renderer reveals the original text only after that receipt succeeds; it does not turn a pending or failed call into an apparent message.
+
 The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded URL credentials, invalid JSON, and invalid receipts fail closed. The bearer token is read only from environment configuration and is never returned in status output.
 
-“Visible” is relative to the bound chat destination. Pi's own terminal remains an operator surface; the extension cannot and does not promise to conceal every assistant event that Pi itself chooses to render there. Product hosts should render the confirmed delivery stream to end users and keep operator traces separate.
+“Visible” depends on the selected surface. In a bound external chat, `send_message` is the Agent's delivered voice and plain assistant text remains host-side. In terminal mode, both ordinary assistant text and confirmed `send_message` rows are visible, so the prompt forbids duplicate replies. The extension does not promise to conceal Pi's own tool, assistant, or error output. Product hosts should still render only the confirmed delivery stream to end users and keep operator traces separate.
 
 ## Why there is no punctuation splitter
 
@@ -124,7 +138,7 @@ That keeps a Telegram reconnect bug from changing WeChat behavior and lets every
 
 ## Recovery boundary
 
-The core exposes `inspectHumanMessageDelivery()` and `createHumanMessageRecoveryPrompt()`, but the installable generic Webhook entry does not automatically start a recovery Agent run. Reliable recovery needs a durable product turn id, persisted delivery trace, and host scheduling semantics that a generic Pi package cannot infer safely.
+The core exposes `inspectHumanMessageDelivery()` and `createHumanMessageRecoveryPrompt()`, but the installable package does not automatically start a recovery Agent run. Reliable recovery needs a durable product turn id, persisted delivery trace, and host scheduling semantics that a generic Pi package cannot infer safely.
 
 This is intentional. A production host may run one review using the existing transcript and only the `send_message` tool. It must not re-execute external actions or repeat confirmed messages. Check genuine provider errors before starting a review; do not disguise an outage as a missing message.
 

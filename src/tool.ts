@@ -1,6 +1,8 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type, type Static } from "@earendil-works/pi-ai";
 
+import type { HumanMessageDeliverySurface } from "./prompt.js";
+
 export const SEND_MESSAGE_TOOL_NAME = "send_message";
 export const DEFAULT_MAX_MESSAGE_CHARS = undefined;
 
@@ -110,9 +112,16 @@ export function createTurnBoundSendMessagePort(
 export function createSendMessageAgentTool(
   send: SendMessagePort,
   options: SendMessageToolOptions = {},
+  deliverySurface: HumanMessageDeliverySurface = "bound_chat",
 ): AgentTool<typeof SEND_MESSAGE_PARAMETERS, SendMessageReceipt> {
+  if (deliverySurface !== "bound_chat" && deliverySurface !== "pi_terminal") {
+    throw new TypeError("deliverySurface must be bound_chat or pi_terminal");
+  }
   const maxMessageChars = options.maxMessageChars ?? DEFAULT_MAX_MESSAGE_CHARS;
   const parameters = createSendMessageParameters(maxMessageChars);
+  const destinationGuidance = deliverySurface === "pi_terminal"
+    ? "A successful call displays the text as one separate message in the current Pi terminal. Pi also displays ordinary assistant text, so do not repeat the same reply after calling this tool."
+    : "Plain assistant text is private, and the host already binds the destination, so do not provide a channel or recipient.";
   return {
     name: SEND_MESSAGE_TOOL_NAME,
     label: "Send Message",
@@ -122,7 +131,7 @@ export function createSendMessageAgentTool(
       "Choose message boundaries by meaning and natural pauses; call again when a separate thought or later verified result deserves another bubble.",
       "A line break inside one call is still one bubble. Closely related sentences can stay together.",
       "The text must stand on its own as a complete thought; never send an incomplete word or sentence fragment merely to reach a requested message count.",
-      "Plain assistant text is private, and the host already binds the destination, so do not provide a channel or recipient.",
+      destinationGuidance,
     ].join(" "),
     parameters,
     executionMode: "sequential",

@@ -23,7 +23,11 @@ The host application must enforce:
 
 The model receives only message text for `send_message`; it must never be allowed to choose the recipient from untrusted prompt content.
 
-The installable extension accepts its route-bound destination only from `PI_HUMAN_MESSAGE_WEBHOOK_URL`. Use HTTPS outside localhost, keep `PI_HUMAN_MESSAGE_WEBHOOK_TOKEN` in a secret manager or process environment, and make the receiving endpoint enforce idempotency and authorization. Do not put credentials in the URL.
+Without `PI_HUMAN_MESSAGE_WEBHOOK_URL`, the installable extension uses only the current interactive Pi terminal and makes no Human Message network request. The message text still belongs to the Pi session and is subject to the model provider, transcript storage, and local-machine security already chosen by the user.
+
+When `PI_HUMAN_MESSAGE_WEBHOOK_URL` is set, the installable extension accepts its route-bound external destination only from that trusted configuration. Use HTTPS outside localhost, keep `PI_HUMAN_MESSAGE_WEBHOOK_TOKEN` in a secret manager or process environment, and make the receiving endpoint enforce idempotency and authorization. Do not put credentials in the URL. An invalid explicit Webhook URL fails closed and is never treated as permission to display the message somewhere else.
+
+Terminal rendering is presentation, not delivery authorization. It does not hide Pi's normal assistant output, tools, or errors, and it must not be used to conceal sensitive operations from the person running Pi.
 
 ## Supported versions
 
