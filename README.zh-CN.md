@@ -2,7 +2,7 @@
 
 # Human Message · 拟人发消息
 
-**让 Pi 做完事以后，像聊天一样回复你。**
+**让 Pi 做事，用聊天的方式告诉你结果。**
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
@@ -16,57 +16,56 @@
 
 </div>
 
-## 安装后直接使用
+Human Message 给 Agent 一个 `send_message` 工具。一次调用就是一条消息；该说一条还是几条，由 Agent 根据意思决定。
 
-请使用 Pi 0.84.4 或更新版本。终端接入已在 Pi 0.84.4 和 0.85.0 上验证。
+## 在真实 Pi 终端里
+
+下面根据一次真实运行整理。Pi 先读取 README，再把安装方法自然地分成两条消息：
+
+```text
+你 › 请读一下 README.md。我要把这个插件发给朋友：请先单独发出
+     最短安装命令；发送成功后，再单独发一条说明安装后在哪里看到
+     效果。两条都像正常聊天，不加标题或编号。不要修改文件。
+
+Pi │ 读取 README.md
+   │
+Pi │ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+   │
+Pi └ 安装后重启 Pi，或在已打开的 Pi 里运行 /reload；在交互式
+     Pi 终端中就能看到效果，插件发出的每条消息会作为独立消息显示。
+```
+
+这次实跑使用 Pi 0.84.4 和 GPT-5.6 Luna。两条回复来自两次真实的 `send_message` 调用，没有重复的最终回答；恢复会话后也仍然是两条消息。上面的终端样式根据 session 记录重排，用户任务和 Pi 回复保持原文。另一次只需要一个完整回答的实跑仅发送了一条，插件不会为了凑效果强行拆分。[查看验证记录](docs/EVALUATION.md)
+
+## 安装
+
+还没有 [Pi](https://pi.dev/docs/latest)：
+
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+然后安装 Human Message：
 
 ```bash
 pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 ```
 
-启动 Pi；如果 Pi 已经打开，执行一次 `/reload`。这样就可以了，不需要 Webhook、机器人或另一份 API Key。
+运行 `pi`。第一次使用可以在 Pi 中输入 `/login` 登录模型；如果 Pi 已经打开，安装后输入 `/reload`。再输入 `/human-message`，即可确认插件已经生效。
 
-在 Pi 的交互式终端里，Agent 会得到一个 `send_message` 工具。每次发送成功，就会干净地显示成一条独立消息；Pi 原本的工具过程和错误仍会正常显示。
+请使用 Pi 0.84.4 或更新版本。Human Message 本身不需要 Webhook、机器人或另一份 API Key。
 
-> **你：** 看看登录回调为什么失败，顺便修好。
->
-> *Pi 检查项目并完成修改。*
->
-> **Pi：** 找到了，是回调地址和配置的域名不一致。
->
-> **Pi：** 已经修好，登录测试也通过了。
+## 接进自己的产品
 
-插件不会在生成后按标点或字数切段。该说一条还是几条、在哪里自然停顿，都由 Agent 根据意思决定。简单回答仍然只说一句，也没有固定条数或字数目标。
+要把 Human Message 接进 Telegram、微信、飞书或其他产品，只需连接产品已有的消息发送能力。具体接入方式见[实现说明](docs/ARCHITECTURE.md)。
 
-输入 `/human-message` 可以查看终端发送是否生效。默认终端体验只在 Pi 的交互式 TUI 中启用；print、JSON 和 RPC 模式继续保持 Pi 原本的输出方式。
+## 怎么工作
 
-## 发到其他聊天应用
-
-Webhook 是给产品接入用的高级模式，不是普通用户安装插件的前置条件：
-
-```bash
-export PI_HUMAN_MESSAGE_WEBHOOK_URL="https://your-app.example/send"
-export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="your-secret" # 可选
-pi
+```text
+你提出任务 → Pi 使用工具完成工作 → Agent 调用 send_message → 显示一条或几条自然消息
 ```
 
-配置有效的 Webhook 地址后，插件会从终端发送切换为原有的定向 Webhook 投递。收件人、鉴权、重试、权限和各渠道 SDK，仍由你的应用负责。
-
-如果产品本身已经嵌入 Pi，可以直接传入现有的发送函数，不需要多绕一层 HTTP。详见[实现说明](docs/ARCHITECTURE.md)。
-
-## 从 v0.3 升级
-
-固定安装在 `@v0.3.0` 的用户不会被自动改变；只有主动安装新版本，才会进入 v0.4。
-
-v0.3 在没有 Webhook 时会保持停用。v0.4 则会默认在 Pi 交互式终端中生效。已经配置了有效 Webhook 的用户，升级后仍然走原来的 Webhook 投递。
-
-## 插件做了什么
-
-- 给 Agent 一个 `send_message` 工具。
-- 让 Agent 在工作过程中自己决定自然的消息边界。
-- 只改变发送成功后的终端展示，不复制一份聊天记录，也不替换 Pi 的终端。
-
-自动化检查覆盖提示词、发送回执、终端展示、恢复会话后的展示、Webhook 校验、可选限制和交付检查。历史实跑结果单独记录在[评测说明](docs/EVALUATION.md)中。
+它不会把生成好的长段落按标点或字数硬切开，也不要求固定发送几条。Pi 原本的工具过程和错误仍会正常显示。
 
 ## 开发
 
@@ -75,7 +74,7 @@ pnpm install
 pnpm check
 ```
 
-[更多例子](docs/SHOWCASE.zh-CN.md) · [实现说明](docs/ARCHITECTURE.md) · [安全说明](SECURITY.md) · [贡献指南](CONTRIBUTING.md)
+[更多例子](docs/SHOWCASE.zh-CN.md) · [实现说明](docs/ARCHITECTURE.md) · [验证记录](docs/EVALUATION.md) · [更新记录](CHANGELOG.md) · [安全说明](SECURITY.md)
 
 <div align="center">
 

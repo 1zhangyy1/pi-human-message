@@ -2,7 +2,7 @@
 
 # Human Message
 
-**Let Pi do the work, then reply like it belongs in chat.**
+**Let Pi work. Get the result as natural chat messages.**
 
 [English](README.md) · [简体中文](README.zh-CN.md)
 
@@ -16,57 +16,57 @@
 
 </div>
 
-## Install and use
+Human Message gives the agent one `send_message` tool. One call is one message; the agent decides where a real conversational pause belongs.
 
-Use Pi 0.84.4 or newer. The terminal integration is tested with Pi 0.84.4 and 0.85.0.
+## A real Pi terminal run
+
+This transcript was reconstructed from a real Pi run. Pi read the README, then shared the install method as two natural messages:
+
+```text
+you › Read README.md. I want to share this plugin with a friend. First send
+      the shortest install command as its own message. After it succeeds,
+      send another message explaining where the effect appears. Keep both
+      conversational, with no headings or numbers. Do not modify files.
+
+Pi  │ read README.md
+    │
+Pi  │ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+    │
+Pi  └ Restart Pi, or run /reload in an open session. You will see the effect
+      in the interactive Pi terminal, with every sent message shown separately.
+```
+
+The recorded run used Pi 0.84.4 and GPT-5.6 Luna. The two replies were two real `send_message` calls, with no duplicate final answer, and they remained separate after session resume. The terminal layout was reconstructed from the session record; this English transcript translates the original Chinese task and replies. In another real run, one cohesive answer stayed as one message—the plugin does not split merely for effect. [See the verification record](docs/EVALUATION.md).
+
+## Install
+
+If you do not have [Pi](https://pi.dev/docs/latest) yet:
+
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+Then install Human Message:
 
 ```bash
 pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 ```
 
-Start Pi, or run `/reload` if Pi is already open. That is all: no Webhook, bot, or extra API key is required.
+Run `pi`. On first use, enter `/login` in Pi to choose a model provider. If Pi is already open, run `/reload` after installation. Use `/human-message` to confirm that delivery is active.
 
-In the interactive Pi terminal, the Agent gets a `send_message` tool. Every successful call appears as one quiet, standalone message. Pi still shows its normal tool work and errors.
+Use Pi 0.84.4 or newer. Human Message itself needs no Webhook, bot, or separate API key.
 
-> **You:** Check why the login callback is failing and fix it.
->
-> *Pi inspects the project and makes the change.*
->
-> **Pi:** Found it — the callback URL did not match the configured origin.
->
-> **Pi:** I fixed it and the login test now passes.
+## Add it to your product
 
-Human Message does not split prose after generation. The Agent decides whether the answer needs one message or a few, based on meaning and natural pauses. Short answers stay short; there is no required message count or character target.
+To use Human Message in Telegram, WeChat, Feishu, or another product, connect it to the product's existing message sender. See [Architecture](docs/ARCHITECTURE.md) for integration details.
 
-Run `/human-message` to see whether terminal delivery is active. The default terminal experience is enabled only in Pi's interactive TUI; print, JSON, and RPC modes keep their normal output behavior.
+## How it works
 
-## Send to another app
-
-Webhook delivery is an optional advanced mode for products that already know the destination:
-
-```bash
-export PI_HUMAN_MESSAGE_WEBHOOK_URL="https://your-app.example/send"
-export PI_HUMAN_MESSAGE_WEBHOOK_TOKEN="your-secret" # optional
-pi
+```text
+Your task → Pi does the work with tools → agent calls send_message → one or more natural messages appear
 ```
 
-Setting a valid Webhook URL switches the installed extension from terminal delivery to the existing route-bound Webhook. Your application still owns the recipient, authentication, retries, permissions, and channel SDK.
-
-For an embedded Pi host, inject its existing send function directly instead of adding an HTTP hop. See [Architecture](docs/ARCHITECTURE.md).
-
-## Upgrading from v0.3
-
-An install pinned to `@v0.3.0` does not change. It remains on v0.3 until you explicitly install another ref.
-
-In v0.3, an installation without a Webhook stayed inactive. In v0.4, that same setup becomes useful in the interactive Pi terminal. Existing valid Webhook configurations continue to use Webhook delivery.
-
-## What the plugin changes
-
-- It gives the Agent one `send_message` tool.
-- It lets the Agent choose natural message boundaries while it works.
-- It changes only how successful `send_message` calls appear; it does not create another conversation history or replace Pi's terminal.
-
-Automated checks cover prompt behavior, delivery receipts, terminal rendering, resumed display, Webhook validation, optional limits, and recovery. Historical live-model results are kept separately in [Evaluation](docs/EVALUATION.md).
+It does not split finished prose by punctuation or character count, and it does not require a fixed number of messages. Pi's normal tool work and errors remain visible.
 
 ## Develop
 
@@ -75,7 +75,7 @@ pnpm install
 pnpm check
 ```
 
-[Examples](docs/SHOWCASE.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+[Examples](docs/SHOWCASE.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/EVALUATION.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
 
 <div align="center">
 
