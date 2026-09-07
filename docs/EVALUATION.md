@@ -2,6 +2,31 @@
 
 `pi-human-message` evaluates visible chat behavior, not general intelligence. Every scenario starts a fresh Pi Agent session and records successful `send_message` deliveries plus non-message tool calls.
 
+## Unreleased chat display verification
+
+Verified on 2026-09-07 with Pi `0.85.1`, including both its published ESM components and bundled CLI. `pnpm check` passed all **86 tests**, typechecking, build, and package-content validation.
+
+A real interactive CLI run used `openai-codex/gpt-5.5`, a temporary profile, this source extension, and one harmless confirmation-test tool. Four user turns produced five confirmed messages. The session log retained file reads and tool results; ordinary final assistant text was empty on every turn.
+
+- Reading `package.json` produced one answer through `send_message`; chat view hid the read row and restored it with F8.
+- A follow-up produced one message, without a forced split or duplicate ending.
+- The confirmation case produced `send_message → confirmation tool → send_message`. The native Yes/No dialog remained visible in chat view. Selecting No returned a declined result; no file or external action was involved.
+- `/reload` preserved chat view. Exiting and reopening the saved session reconstructed all four messages from the first three turns, without rerunning any tool or sending anything again.
+- Reading an intentionally absent test file exposed the real `ENOENT` error and restored the full transcript. Trying to switch that session back to chat explained that `/new` was needed; it did not briefly claim a successful switch.
+- The same source extension in `pi -p` returned ordinary stdout `OK`; terminal delivery remained inactive.
+
+An excerpt from the confirmation test (translated from the Chinese run):
+
+> User: I want to see the confirmation window. Run qa_confirm, but first tell me whether it will actually touch any files.
+>
+> Pi: It won't touch files. qa_confirm is a harmless confirmation demo; it doesn't write files or perform external actions.
+>
+> [Native confirmation shown. Tester selects No.]
+>
+> Pi: The confirmation was not approved, so no action was taken.
+
+This is a real-model **smoke test**, not a naturalness benchmark or a demonstration of a product integration. Unknown custom tool renderers, conflicting display extensions, model interruption/truncation, legacy histories, and noninteractive modes additionally have deterministic coverage; this run does not establish compatibility with every third-party UI or model. The private test profile and raw traces are not shipped.
+
 ## 0.4.0 verification boundary
 
 The v0.4 release gate adds deterministic coverage for the default Pi terminal path:

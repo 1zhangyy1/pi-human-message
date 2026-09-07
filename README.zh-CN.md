@@ -20,7 +20,7 @@ Human Message 给 Agent 一个 `send_message` 工具。一次调用就是一条�
 
 ## 在真实 Pi 终端里
 
-下面根据一次真实运行整理。Pi 先读取 README，再把安装方法自然地分成两条消息：
+下面是 v0.4.0 在 Pi 原生终端视图中的真实记录整理，不是新版聊天显示。Pi 先读取 README，再按用户要求发出两条消息：
 
 ```text
 你 › 请读一下 README.md。我要把这个插件发给朋友：请先单独发出
@@ -55,6 +55,11 @@ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 
 请使用 Pi 0.84.4 或更新版本。Human Message 本身不需要 Webhook、机器人或另一份 API Key。
 
+> **开发中，尚未发布：**新版聊天显示面向 Pi 0.85.1；上面的安装命令仍安装 v0.4.0。
+> 兼容时默认开启：`send_message` 回复即时显示，Agent 普通正文和工具过程不再混进对话。
+> 输入 `/human-message chat` 或 `/human-message normal`，也可按 **F8** 切换；`/human-message` 或 `/human-message status` 查看当前状态。
+> 普通视图保留消息工具，恢复完整过程。遇到错误、兼容性不确定或未发出的回答会回退普通视图；系统和扩展界面仍然保留。[兼容范围](docs/ARCHITECTURE.md#chat-display-unreleased)。
+
 ## 接进自己的产品
 
 要把 Human Message 接进 Telegram、微信、飞书或其他产品，只需连接产品已有的消息发送能力。具体接入方式见[实现说明](docs/ARCHITECTURE.md)。
@@ -65,7 +70,7 @@ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 你提出任务 → Pi 使用工具完成工作 → Agent 调用 send_message → 显示一条或几条自然消息
 ```
 
-它不会把生成好的长段落按标点或字数硬切开，也不要求固定发送几条。Pi 原本的工具过程和错误仍会正常显示。
+它不会把生成好的长段落按标点或字数硬切开，也不要求固定发送几条。已发布的 v0.4.0 仍正常显示 Pi 原本的工具过程和错误。
 
 ## 开发
 

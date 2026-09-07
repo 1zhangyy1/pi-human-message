@@ -20,7 +20,7 @@ Human Message gives the agent one `send_message` tool. One call is one message; 
 
 ## A real Pi terminal run
 
-This transcript was reconstructed from a real Pi run. Pi read the README, then shared the install method as two natural messages:
+This v0.4.0 transcript was reconstructed from a real run in Pi's original terminal view, not the new chat display. Pi read the README, then sent the two messages requested by the user:
 
 ```text
 you › Read README.md. I want to share this plugin with a friend. First send
@@ -56,6 +56,11 @@ Run `pi`. On first use, enter `/login` in Pi to choose a model provider. If Pi i
 
 Use Pi 0.84.4 or newer. Human Message itself needs no Webhook, bot, or separate API key.
 
+> **Unreleased — chat display:** in development for Pi 0.85.1; the install command above still installs v0.4.0.
+> On a compatible runtime, chat display starts by default: `send_message` replies appear immediately, while ordinary Agent prose and tool activity stay out of the conversation.
+> Use `/human-message chat` or `/human-message normal`, or press **F8** to switch. `/human-message` and `/human-message status` show the current state.
+> Normal view keeps the message tool and restores the full activity trace. Errors, uncertain compatibility, or otherwise hidden answers restore normal view; system and extension UI remain available. [Compatibility details](docs/ARCHITECTURE.md#chat-display-unreleased).
+
 ## Add it to your product
 
 To use Human Message in Telegram, WeChat, Feishu, or another product, connect it to the product's existing message sender. See [Architecture](docs/ARCHITECTURE.md) for integration details.
@@ -66,7 +71,7 @@ To use Human Message in Telegram, WeChat, Feishu, or another product, connect it
 Your task → Pi does the work with tools → agent calls send_message → one or more natural messages appear
 ```
 
-It does not split finished prose by punctuation or character count, and it does not require a fixed number of messages. Pi's normal tool work and errors remain visible.
+It does not split finished prose by punctuation or character count, and it does not require a fixed number of messages. The released v0.4.0 keeps Pi's normal tool work and errors visible.
 
 ## Develop
 

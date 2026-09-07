@@ -47,9 +47,11 @@ test("prompt exposes intentional acknowledgement profiles", () => {
   );
 });
 
-test("terminal prompt uses send_message without hiding ordinary Pi output", () => {
+test("terminal prompt uses send_message as its voice and distinguishes chat from normal display", () => {
   const prompt = createHumanMessageSystemPrompt({ deliverySurface: "pi_terminal" });
-  assert.match(prompt, /separate conversational messages in the current Pi terminal/u);
+  assert.match(prompt, /Use send_message for every user-facing reply in the current Pi terminal/u);
+  assert.match(prompt, /chat view hides it/u);
+  assert.doesNotMatch(prompt, /If you do not use it, answer normally/u);
   assert.match(prompt, /Pi also displays ordinary assistant text/u);
   assert.doesNotMatch(prompt, /only voice to the user|private working space/u);
   assert.equal(
