@@ -13,7 +13,7 @@ The extension owns:
 - delivery receipts;
 - delivery-state inspection and a one-shot recovery prompt;
 - a small native presentation for confirmed messages in Pi's interactive terminal;
-- an unreleased, version-gated chat display with a normal-view fallback;
+- a version-gated chat display with a normal-view fallback;
 - a safe generic Webhook port for the installable Pi package.
 
 The host owns:
@@ -66,9 +66,9 @@ With a valid URL, it creates a route-bound Webhook port and invokes the same `cr
 
 An explicitly configured but invalid URL never falls back to terminal delivery. That would silently send content to the wrong surface, so invalid remote configuration remains fail-closed.
 
-### Chat display (Unreleased)
+### Chat display
 
-The development version enables chat display by default only on a compatible Pi 0.85.1 TUI. Confirmed deliveries from this extension's own `send_message` tool appear immediately; ordinary Agent text and tool execution rows are hidden. Tools still execute normally, with their inputs, results, and session records unchanged. This is not an overlay or another Agent runtime.
+Since v0.5.0, chat display starts by default only on a compatible Pi 0.85.1 TUI. Confirmed deliveries from this extension's own `send_message` tool appear immediately; ordinary Agent text and tool execution rows are hidden. Tools still execute normally, with their inputs, results, and session records unchanged. This is not an overlay or another Agent runtime.
 
 `/human-message` and `/human-message status` report the state. `/human-message chat` enables chat display; `/human-message normal` restores the full activity trace without disabling `send_message`. F8 switches between the two views. System notifications, native confirmations, and extension UI are not filtered.
 
@@ -76,7 +76,7 @@ The development version enables chat display by default only on a compatible Pi 
 
 Normal view is restored when a third-party custom renderer cannot be safely hidden (even a completed result can contain controls), a tool or model fails, a response is aborted or truncated, or a completed run leaves nonempty ordinary assistant text that would otherwise be hidden. Existing sessions containing ordinary assistant prose or errors also keep normal view so earlier answers and failures do not disappear; use `/new` to start chat view again. Display fallback does not retry a task, change a tool result, or manufacture a replacement answer. Native confirmation UI remains untouched; arbitrary third-party interactive renderers are not claimed to be universally compatible.
 
-This feature is unreleased. The v0.4.0 installation commands and old terminal examples do not demonstrate chat display; the new CLI smoke test is recorded separately in [Evaluation](EVALUATION.md#unreleased-chat-display-verification). Webhook, embedded-host, print, JSON, and RPC behavior is unchanged.
+The historical v0.4.0 terminal examples do not demonstrate chat display; the v0.5.0 CLI smoke test is recorded separately in [Evaluation](EVALUATION.md#chat-display-verification). Webhook, embedded-host, print, JSON, and RPC behavior is unchanged.
 
 ### Embedded product extension
 
@@ -112,7 +112,7 @@ Pi can produce several low-level model turns while resolving tool calls. There i
 | `tool.ts` | Pi tool schema, receipts, optional host limits | Telegram/WeChat APIs |
 | `pi-extension.ts` | Pi lifecycle wiring | environment variables, product routing |
 | `extensions/terminal.ts` | confirmed-message rendering in Pi's TUI | external channels, prompt policy |
-| `extensions/chat-display.ts` (unreleased) | version-gated chat display and normal-view fallback | tool execution, result mutation, channel delivery |
+| `extensions/chat-display.ts` | version-gated chat display and normal-view fallback | tool execution, result mutation, channel delivery |
 | `webhook.ts` | HTTPS/local transport and receipt validation | model behavior, recipient selection |
 | `recovery.ts` | trace inspection and recovery instruction | retry storage, channel SDKs |
 | `evaluation.ts` | deterministic transcript gates | runtime package entry point |
@@ -130,7 +130,7 @@ In terminal mode, delivery is local and makes no network request. Its stable rec
 
 The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded URL credentials, invalid JSON, and invalid receipts fail closed. The bearer token is read only from environment configuration and is never returned in status output.
 
-“Visible” depends on the selected surface. In a bound external chat, `send_message` is the Agent's delivered voice and plain assistant text remains host-side. In released v0.4.0 and normal terminal view, both ordinary assistant text and confirmed `send_message` rows are visible. The unreleased chat display hides ordinary Agent prose and tool activity but retains system and extension UI, with the safety fallbacks described above. Hidden terminal content remains in the session and is not private or deleted. Product hosts should render only the confirmed delivery stream to end users and keep operator traces separate.
+“Visible” depends on the selected surface. In a bound external chat, `send_message` is the Agent's delivered voice and plain assistant text remains host-side. In v0.4.0 and normal terminal view, both ordinary assistant text and confirmed `send_message` rows are visible. The v0.5.0 chat display hides ordinary Agent prose and tool activity but retains system and extension UI, with the safety fallbacks described above. Hidden terminal content remains in the session and is not private or deleted. Product hosts should render only the confirmed delivery stream to end users and keep operator traces separate.
 
 ## Why there is no punctuation splitter
 

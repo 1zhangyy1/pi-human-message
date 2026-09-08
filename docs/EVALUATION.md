@@ -2,9 +2,9 @@
 
 `pi-human-message` evaluates visible chat behavior, not general intelligence. Every scenario starts a fresh Pi Agent session and records successful `send_message` deliveries plus non-message tool calls.
 
-## Unreleased chat display verification
+## Chat display verification
 
-Verified on 2026-09-07 with Pi `0.85.1`, including both its published ESM components and bundled CLI. `pnpm check` passed all **86 tests**, typechecking, build, and package-content validation.
+The v0.5.0 chat display was verified on 2026-09-07 with Pi `0.85.1`, including both its published ESM components and bundled CLI. `pnpm check` passed all **86 tests**, typechecking, build, and package-content validation.
 
 A real interactive CLI run used `openai-codex/gpt-5.5`, a temporary profile, this source extension, and one harmless confirmation-test tool. Four user turns produced five confirmed messages. The session log retained file reads and tool results; ordinary final assistant text was empty on every turn.
 

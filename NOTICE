@@ -12,7 +12,7 @@ from these MIT-licensed projects:
 Those reference prompts are used only as reproducible comparison baselines.
 They are not claimed to be xAI's private production prompts.
 
-The unreleased terminal chat-display design also draws on implementation
+The terminal chat-display design also draws on implementation
 lessons from these MIT-licensed community projects:
 
 - Kevin Vargas, pi-quiet-activity
