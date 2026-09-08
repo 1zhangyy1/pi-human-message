@@ -1,6 +1,6 @@
 {
   "name": "pi-human-message",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A Pi extension for agent-authored, human-shaped chat messages",
   "type": "module",
   "sideEffects": false,
@@ -76,11 +76,6 @@
     "@earendil-works/pi-ai": "*",
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*"
-  },
-  "peerDependenciesMeta": {
-    "@earendil-works/pi-coding-agent": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@earendil-works/pi-agent-core": "0.85.1",

@@ -27,7 +27,9 @@ Without `PI_HUMAN_MESSAGE_WEBHOOK_URL`, the installable extension uses only the 
 
 When `PI_HUMAN_MESSAGE_WEBHOOK_URL` is set, the installable extension accepts its route-bound external destination only from that trusted configuration. Use HTTPS outside localhost, keep `PI_HUMAN_MESSAGE_WEBHOOK_TOKEN` in a secret manager or process environment, and make the receiving endpoint enforce idempotency and authorization. Do not put credentials in the URL. An invalid explicit Webhook URL fails closed and is never treated as permission to display the message somewhere else.
 
-Terminal rendering is presentation, not delivery authorization. It does not hide Pi's normal assistant output, tools, or errors, and it must not be used to conceal sensitive operations from the person running Pi.
+Terminal rendering is presentation, not delivery authorization. Chat view hides ordinary assistant prose and tool activity, but the original records remain in the Pi session; normal view restores them. Errors and uncertain display compatibility trigger a normal-view fallback, and native confirmations and extension UI remain visible. This display filter is not a privacy boundary or a substitute for tool authorization.
+
+Webhook delivery rejects redirects, including redirects to another HTTPS address. Configure the final destination directly; a redirect must not forward conversation text to a different route.
 
 ## Supported versions
 

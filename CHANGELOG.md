@@ -2,6 +2,15 @@
 
 All notable changes are documented here. The project follows semantic versioning after the initial `0.1.0` release.
 
+## 0.5.1 - 2026-09-08
+
+- Verify local terminal receipts before rendering a confirmed message; preserve foreign and unconfirmed results in restored sessions.
+- Check the final persisted assistant messages at run completion, including changes made by later extensions, before keeping chat view enabled.
+- Reject Webhook redirects so message bodies stay on the configured route.
+- Replay confirmed calls without consuming another slot at an explicit message cap. Allow durable hosts to supply a read-only receipt lookup for resumed full turns; do not add default limits or retry tasks.
+- Correct the Pi Coding Agent peer dependency required by the public TypeScript API, without changing existing imports.
+- Update the display security boundary and label README animations as concepts, not terminal recordings.
+
 ## 0.5.0 - 2026-09-08
 
 - Add a default chat display for compatible Pi 0.85.1 terminals: show confirmed Human Message deliveries immediately while keeping ordinary Agent prose and tool activity out of the conversation. Normal view keeps the same message tool and restores the activity trace.

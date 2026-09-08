@@ -17,6 +17,7 @@ const theme = {
 function context(text: string, isError = false) {
   return {
     args: { text },
+    toolCallId: "call-1",
     isError,
   } as never;
 }
@@ -74,7 +75,7 @@ test("terminal presentation hides pending calls and shows only confirmed message
   const success = presentation.renderResult?.(
     {
       content: [{ type: "text", text: '{"status":"delivered"}' }],
-      details: { messageId: "sent", externalMessageIds: [], idempotentReplay: false },
+      details: { messageId: "pi-terminal:call-1", externalMessageIds: [], idempotentReplay: false },
     },
     { expanded: false, isPartial: false },
     theme,
@@ -96,6 +97,49 @@ test("terminal presentation keeps failures visible instead of claiming delivery"
     context("这条不应该显示", true),
   );
   assert.deepEqual(visibleLines(failure as never), ["Operation aborted"]);
+});
+
+test("terminal history requires a matching local receipt and preserves unverified result text", () => {
+  const presentation = createTerminalToolPresentation();
+  for (const details of [
+    undefined,
+    null,
+    {},
+    { messageId: "foreign:call-1", externalMessageIds: [], idempotentReplay: false },
+    { messageId: "pi-terminal:another-call", externalMessageIds: [], idempotentReplay: false },
+    { messageId: "pi-terminal:call-1", externalMessageIds: ["external-message"], idempotentReplay: false },
+    { messageId: "pi-terminal:call-1", externalMessageIds: [] },
+  ]) {
+    const result = presentation.renderResult?.(
+      { content: [{ type: "text", text: "Draft only. Not sent; please confirm first." }], details } as never,
+      { expanded: false, isPartial: false },
+      theme,
+      context("This draft must not look delivered"),
+    );
+    assert.deepEqual(visibleLines(result as never), [
+      "send_message · unverified result",
+      "Draft only. Not sent; please confirm first.",
+    ]);
+  }
+});
+
+test("terminal history with missing or malformed arguments never throws or claims a bubble", () => {
+  const presentation = createTerminalToolPresentation();
+  for (const args of [undefined, null, {}, { text: null }, { text: 42 }, { text: " \n" }]) {
+    const result = presentation.renderResult?.(
+      {
+        content: [{ type: "text", text: "Original result remains visible" }],
+        details: { messageId: "pi-terminal:call-1", externalMessageIds: [], idempotentReplay: false },
+      },
+      { expanded: false, isPartial: false },
+      theme,
+      { args, toolCallId: "call-1", isError: false } as never,
+    );
+    assert.deepEqual(visibleLines(result as never), [
+      "send_message · unverified result",
+      "Original result remains visible",
+    ]);
+  }
 });
 
 test("Pi's real tool component preserves terminal messages live and after resume", async () => {
@@ -164,6 +208,22 @@ test("Pi's real tool component preserves terminal messages live and after resume
     isError: true,
   });
   assert.deepEqual(visibleLines(failed), ["Operation aborted"]);
+
+  // Pi resumes a tool result using the currently registered same-name renderer.
+  // A foreign historical tool's arguments must not replace its actual result.
+  const foreignHistory = new ToolExecutionComponent(
+    "send_message", "foreign-history", { text: "Unsent draft" }, {}, definition,
+    { requestRender() {} }, process.cwd(),
+  );
+  foreignHistory.updateResult({
+    content: [{ type: "text", text: "Not sent. Waiting for your confirmation." }],
+    details: undefined,
+    isError: false,
+  });
+  assert.deepEqual(visibleLines(foreignHistory), [
+    "send_message · unverified result",
+    "Not sent. Waiting for your confirmation.",
+  ]);
 });
 
 async function loadPiRenderer(): Promise<{

@@ -14,7 +14,7 @@ export function registerTerminalChatMode(
   let current: ExtensionContext | undefined;
   let generation = 0;
   let wanted: Mode = "chat";
-  let unvoicedText = false;
+  let activeTurn: { sessionId: string; afterEntryId: string | null } | undefined;
 
   function canDeliver(): boolean {
     return pi.getActiveTools().includes("send_message")
@@ -86,7 +86,7 @@ export function registerTerminalChatMode(
     generation++;
     display.disable();
     current = ctx;
-    unvoicedText = false;
+    activeTurn = undefined;
     wanted = "chat";
     for (const entry of ctx.sessionManager.getBranch()) {
       if (entry.type !== "custom" || entry.customType !== VIEW_ENTRY) continue;
@@ -132,25 +132,34 @@ export function registerTerminalChatMode(
   pi.on("session_tree", restore);
   pi.on("before_agent_start", (_event, ctx) => {
     current = ctx;
-    unvoicedText = false;
+    activeTurn = {
+      sessionId: ctx.sessionManager.getSessionId(),
+      afterEntryId: ctx.sessionManager.getLeafId(),
+    };
     if (!canDeliver() || ctx.mode !== "tui") display.disable();
     else if (wanted === "chat" && !display.isEnabled()) enable(ctx);
     updateStatus(ctx);
   });
-  pi.on("message_end", (event) => {
-    if (event.message.role === "assistant"
-      && event.message.content.some((block) => block.type === "text" && block.text.trim())) {
-      unvoicedText = true;
-    }
-  });
   pi.on("agent_settled", (_event, ctx) => {
-    if (display.isEnabled() && unvoicedText) {
+    const turn = activeTurn;
+    activeTurn = undefined;
+    if (!display.isEnabled() || !turn || turn.sessionId !== ctx.sessionManager.getSessionId()) return;
+    // Pi runs every message_end handler before persisting the final replacement.
+    // Inspect that final history, not the intermediate message our handler saw.
+    const branch = ctx.sessionManager.getBranch();
+    const start = turn.afterEntryId === null ? -1 : branch.findIndex((entry) => entry.id === turn.afterEntryId);
+    if (turn.afterEntryId !== null && start === -1) {
+      useNormal(ctx, "Session history changed during the turn. Showing the full transcript.");
+    } else if (branch.slice(start + 1).some((entry) => entry.type === "message"
+      && entry.message.role === "assistant"
+      && entry.message.content.some((block) => block.type === "text" && block.text.trim()))) {
       useNormal(ctx, "The agent wrote outside send_message. Showing the original response so nothing is lost.");
     }
   });
   pi.on("session_shutdown", () => {
     generation++;
     current = undefined;
+    activeTurn = undefined;
     display.dispose();
   });
 }

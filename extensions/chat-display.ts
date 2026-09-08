@@ -6,6 +6,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 
 import { PI_TERMINAL_TOOL_GUIDELINE } from "../src/pi-extension.js";
+import { isTerminalDeliveryReceipt } from "./terminal.js";
 
 // Pi has no global transcript filter API. Keep this compatibility boundary
 // separate from the message tool, and reject unverified or patched renderers.
@@ -23,8 +24,10 @@ const VERIFIED_RENDERERS: Record<string, { tool: string; assistant: string }[]> 
 
 interface ToolState {
   toolName: string;
+  toolCallId: string;
+  args?: { text?: unknown };
   isPartial: boolean;
-  result?: { isError: boolean };
+  result?: { isError: boolean; details?: unknown };
   toolDefinition?: {
     promptGuidelines?: string[];
     renderCall?: unknown;
@@ -101,8 +104,11 @@ export function createTerminalChatDisplay(options: TerminalChatDisplayOptions = 
         } else if (state.toolName === "send_message"
           && Array.isArray(state.toolDefinition?.promptGuidelines)
           && state.toolDefinition.promptGuidelines.includes(PI_TERMINAL_TOOL_GUIDELINE)) {
-          // A successful Human Message is visible as soon as its tool settles,
-          // including messages reconstructed when resuming a session.
+          if (state.result && !state.isPartial
+            && (!isTerminalDeliveryReceipt(state.result.details, state.toolCallId)
+              || typeof state.args?.text !== "string" || !state.args.text.trim())) {
+            fallback("A send_message result is not a confirmed terminal delivery. Showing the normal transcript.");
+          }
         } else {
           const customRenderer = typeof state.toolDefinition?.renderCall === "function"
             || typeof state.toolDefinition?.renderResult === "function";

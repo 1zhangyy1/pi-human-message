@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { stripVTControlCharacters } from "node:util";
 import test from "node:test";
 
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { ExtensionRunner, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 import { registerTerminalChatMode } from "../extensions/chat-mode.js";
 import { PI_TERMINAL_TOOL_GUIDELINE } from "../src/pi-extension.js";
@@ -61,7 +61,9 @@ function fakePi(initialMode: Mode = "tui", initialBranch: Entry[] = []) {
   const statuses = new Map<string, string>();
   const appended: { customType: string; data: unknown }[] = [];
   const agentSends: unknown[] = [];
-  let branch = [...initialBranch];
+  let nextEntryId = 0;
+  const withId = (entry: Entry) => ({ ...entry, id: typeof entry.id === "string" ? entry.id : `entry-${++nextEntryId}` });
+  let branch = initialBranch.map(withId);
   let mode = initialMode;
   let sessionId = "session-1";
   let activeTools = ["read", "bash", "send_message"];
@@ -80,7 +82,7 @@ function fakePi(initialMode: Mode = "tui", initialBranch: Entry[] = []) {
     getActiveTools() { return [...activeTools]; },
     appendEntry(customType: string, data: unknown) {
       appended.push({ customType, data });
-      branch.push({ type: "custom", customType, data });
+      branch.push(withId({ type: "custom", customType, data }));
     },
     sendMessage(message: unknown) { agentSends.push(message); },
     sendUserMessage(message: unknown) { agentSends.push(message); },
@@ -92,6 +94,7 @@ function fakePi(initialMode: Mode = "tui", initialBranch: Entry[] = []) {
       hasUI: mode === "tui" || mode === "rpc",
       sessionManager: {
         getBranch() { return [...branch]; },
+        getLeafId() { return branch.at(-1)?.id ?? null; },
         getSessionId() { return contextSessionId; },
         getSessionFile() { return `/tmp/${contextSessionId}.jsonl`; },
         getEntries() { return [...branch]; },
@@ -117,7 +120,21 @@ function fakePi(initialMode: Mode = "tui", initialBranch: Entry[] = []) {
   registerTerminalChatMode(pi, () => "delivery is active in this terminal");
   return {
     handlers, commands, shortcuts, notifications, statuses, appended, agentSends,
-    async emit(name: string, event: Record<string, unknown> = {}) { await Promise.all(dispatch(name, event)); },
+    async emit(name: string, event: Record<string, unknown> = {}) {
+      if (name === "message_end") {
+        // Use Pi's real sequential replacement pipeline, then persist the final
+        // message just as AgentSession._handleAgentEvent does after all hooks.
+        const finalMessage = await ExtensionRunner.prototype.emitMessageEnd.call({
+          extensions: [{ path: "test-extension", handlers }],
+          createContext: context,
+          emitError(error: unknown) { assert.fail(JSON.stringify(error)); },
+        } as never, { type: "message_end", message: event.message } as never);
+        branch.push(withId({ type: "message", message: finalMessage ?? event.message }));
+      } else await Promise.all(dispatch(name, event));
+    },
+    onMessageEnd(handler: Handler) {
+      handlers.set("message_end", [...(handlers.get("message_end") ?? []), handler]);
+    },
     dispatch,
     async command(args: string) {
       const command = commands.get("human-message");
@@ -133,7 +150,7 @@ function fakePi(initialMode: Mode = "tui", initialBranch: Entry[] = []) {
     setActiveTools(next: string[]) { activeTools = next; },
     setSession(nextId: string, nextBranch: Entry[], nextMode: Mode = mode) {
       sessionId = nextId;
-      branch = [...nextBranch];
+      branch = nextBranch.map(withId);
       mode = nextMode;
     },
     async shutdown() { await Promise.all(dispatch("session_shutdown")); },
@@ -398,6 +415,68 @@ test("unexpected ordinary assistant output becomes visible when the turn settles
     await calls.emit("agent_settled");
     assertNormal();
     assert.ok(calls.notifications.length > 0);
+    assert.deepEqual(calls.agentSends, []);
+  } finally {
+    await calls.shutdown();
+  }
+});
+
+test("a later message_end replacement cannot hide the only user-facing answer", async () => {
+  const calls = fakePi();
+  calls.onMessageEnd(() => ({ message: assistant("Answer added by the later extension") }));
+  try {
+    await calls.emit("session_start");
+    await calls.emit("before_agent_start", { systemPrompt: "base" });
+    await calls.emit("message_end", { message: assistant("") });
+    assertChat();
+    await calls.emit("agent_settled");
+    assertNormal();
+    assert.match(calls.notifications.at(-1)?.message ?? "", /outside send_message/u);
+    assert.deepEqual(calls.agentSends, []);
+  } finally {
+    await calls.shutdown();
+  }
+});
+
+test("a later message_end replacement that removes intermediate prose does not cause a false fallback", async () => {
+  const calls = fakePi();
+  calls.onMessageEnd(() => ({ message: assistant("") }));
+  try {
+    await calls.emit("session_start");
+    await calls.emit("before_agent_start", { systemPrompt: "base" });
+    await calls.emit("message_end", { message: assistant("Intermediate text removed before persistence") });
+    await calls.emit("agent_settled");
+    assertChat();
+    assert.deepEqual(calls.agentSends, []);
+  } finally {
+    await calls.shutdown();
+  }
+});
+
+test("the settled scan covers all final messages in the turn, not just its empty last response", async () => {
+  const calls = fakePi();
+  try {
+    await calls.emit("session_start");
+    await calls.emit("before_agent_start", { systemPrompt: "base" });
+    await calls.emit("message_end", { message: assistant("An earlier answer in this same run") });
+    await calls.emit("message_end", { message: assistant("") });
+    await calls.emit("agent_settled");
+    assertNormal();
+    assert.deepEqual(calls.agentSends, []);
+  } finally {
+    await calls.shutdown();
+  }
+});
+
+test("losing the current-turn history boundary fails open instead of guessing which replies to hide", async () => {
+  const calls = fakePi("tui", [viewEntry("chat")]);
+  try {
+    await calls.emit("session_start");
+    await calls.emit("before_agent_start", { systemPrompt: "base" });
+    calls.setSession("session-1", []);
+    await calls.emit("agent_settled");
+    assertNormal();
+    assert.match(calls.notifications.at(-1)?.message ?? "", /history changed/u);
     assert.deepEqual(calls.agentSends, []);
   } finally {
     await calls.shutdown();

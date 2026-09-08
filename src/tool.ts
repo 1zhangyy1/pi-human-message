@@ -55,6 +55,14 @@ export interface TurnBoundSendMessageOptions {
   maxMessagesPerTurn?: number;
   /** Already committed messages when a durable host resumes the same turn. */
   initialSentCount?: number;
+  /** Read-only lookup of a committed delivery when resuming at an explicit cap.
+   * Must not send a message; return undefined if the request is not committed.
+   * Scope lookup to the bound conversation and reject an id with different text.
+   */
+  lookupReceipt?: (
+    request: SendMessageRequest,
+    signal?: AbortSignal,
+  ) => Promise<SendMessageReceipt | undefined>;
 }
 
 export interface TurnBoundSendMessagePort {
@@ -69,7 +77,8 @@ export interface TurnBoundSendMessagePort {
  *
  * Prompt guidance is behavioral; channel limits remain host-owned. A Pi
  * extension resets it on `before_agent_start`. Agent-core hosts may create one
- * controller per user turn or call `reset()` themselves.
+ * controller per user turn or call `reset()` themselves. Invoke sequentially,
+ * as the Pi tool does; durable idempotency stays with the host sender/lookup.
  */
 export function createTurnBoundSendMessagePort(
   deliver: SendMessagePort,
@@ -88,23 +97,50 @@ export function createTurnBoundSendMessagePort(
   ) {
     throw new RangeError("initialSentCount must be a non-negative safe integer within any explicit maxMessagesPerTurn");
   }
-  let sentCount = initialSentCount;
+  const createState = (sentCount: number) => ({
+    sentCount,
+    receipts: new Map<string, { text: string; receipt: SendMessageReceipt }>(),
+  });
+  let state = createState(initialSentCount);
+  const copyReceipt = (receipt: SendMessageReceipt): SendMessageReceipt => ({
+    ...receipt,
+    externalMessageIds: [...receipt.externalMessageIds],
+  });
   return {
     get sentCount() {
-      return sentCount;
+      return state.sentCount;
     },
     async send(request, signal) {
-      if (maxMessagesPerTurn !== undefined && sentCount >= maxMessagesPerTurn) {
+      signal?.throwIfAborted();
+      const turn = state;
+      const previous = turn.receipts.get(request.toolCallId);
+      if (previous) {
+        if (previous.text !== request.text) {
+          throw new TypeError("send_message toolCallId was already delivered with different text");
+        }
+        return { ...copyReceipt(previous.receipt), idempotentReplay: true };
+      }
+      if (maxMessagesPerTurn !== undefined && turn.sentCount >= maxMessagesPerTurn) {
+        // A count cannot identify prior deliveries. Ask the durable host without
+        // invoking the sender, which could commit a new message past the cap.
+        const receipt = await options.lookupReceipt?.(request, signal);
+        signal?.throwIfAborted();
+        if (receipt) {
+          const replay = { ...copyReceipt(receipt), idempotentReplay: true };
+          turn.receipts.set(request.toolCallId, { text: request.text, receipt: replay });
+          return copyReceipt(replay);
+        }
         throw new RangeError(
           `send_message turn limit reached (${maxMessagesPerTurn}); do not send another bubble`,
         );
       }
       const receipt = await deliver(request, signal);
-      if (!receipt.idempotentReplay) sentCount += 1;
+      turn.receipts.set(request.toolCallId, { text: request.text, receipt: copyReceipt(receipt) });
+      if (!receipt.idempotentReplay) turn.sentCount += 1;
       return receipt;
     },
     reset() {
-      sentCount = 0;
+      state = createState(0);
     },
   };
 }
