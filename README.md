@@ -22,29 +22,6 @@ Human Message gives the agent one `send_message` tool. One call is one message; 
 
 Chat view keeps the conversation focused on messages sent by the agent. Tool work stays in the session, and native confirmation dialogs remain visible. [See the real Pi 0.85.1 verification](docs/EVALUATION.md).
 
-<details>
-<summary>Earlier terminal example — v0.4.0</summary>
-
-This historical transcript was reconstructed from a real run in Pi's original terminal view, not v0.5.0 chat view. The installation command below belongs to that old recording; use the current instructions under Install. Pi read the README, then sent the two messages requested by the user:
-
-```text
-you › Read README.md. I want to share this plugin with a friend. First send
-      the shortest install command as its own message. After it succeeds,
-      send another message explaining where the effect appears. Keep both
-      conversational, with no headings or numbers. Do not modify files.
-
-Pi  │ read README.md
-    │
-Pi  │ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
-    │
-Pi  └ Restart Pi, or run /reload in an open session. You will see the effect
-      in the interactive Pi terminal, with every sent message shown separately.
-```
-
-The recorded run used Pi 0.84.4 and GPT-5.6 Luna. The two replies were two real `send_message` calls, with no duplicate final answer, and they remained separate after session resume. The terminal layout was reconstructed from the session record; this English transcript translates the original Chinese task and replies. In another real run, one cohesive answer stayed as one message—the plugin does not split merely for effect. [See the verification record](docs/EVALUATION.md).
-
-</details>
-
 ## Install
 
 Chat view is verified on **Pi 0.85.1**. To install that version of [Pi](https://pi.dev/docs/latest):
@@ -56,10 +33,20 @@ npm install -g --ignore-scripts @earendil-works/pi-coding-agent@0.85.1
 Then install Human Message:
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.5.0
+pi install git:github.com/1zhangyy1/pi-human-message
 ```
 
+This follows `main`, which can include changes not yet released. Re-run the command to remove an older version pin. For a fixed, reproducible version, use the install command on its [Release page](https://github.com/1zhangyy1/pi-human-message/releases).
+
 Run `pi`, then `/login` to connect a model provider if needed. If Pi is already open, run `/reload`. Use `/human-message` or `/human-message status` to check the current view. Existing sessions with ordinary assistant replies or errors stay in normal view; use `/new` to start a fresh chat view.
+
+To update only this plugin, without upgrading Pi itself:
+
+```bash
+pi update --extension git:github.com/1zhangyy1/pi-human-message
+```
+
+Then run `/reload` in Pi.
 
 On a compatible Pi 0.85.1 runtime, chat view starts by default: `send_message` replies appear immediately, while ordinary Agent prose and tool activity stay out of the conversation. Press **F8**, or use `/human-message chat` and `/human-message normal`, to switch views. Normal view keeps the message tool and restores the activity trace.
 
