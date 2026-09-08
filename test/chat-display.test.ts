@@ -182,6 +182,41 @@ test("chat display does not mistake a third-party send_message tool for Human Me
   }
 });
 
+test("same-name history with the current renderer must still have a confirmed local receipt", () => {
+  for (const details of [undefined, { ...delivered("other-call").details }]) {
+    const display = createTerminalChatDisplay();
+    const restored = ownMessage("An unsent historical draft", "historical-call");
+    try {
+      assert.equal(display.enable(), true);
+      restored.updateResult({
+        content: [{ type: "text", text: "Not sent; waiting for confirmation." }],
+        details,
+        isError: false,
+      });
+      const lines = visible(restored);
+      assert.equal(display.isEnabled(), false);
+      assert.deepEqual(lines, ["send_message · unverified result", "Not sent; waiting for confirmation."]);
+      assert.match(display.getReason() ?? "", /not a confirmed terminal delivery/u);
+    } finally {
+      display.dispose();
+    }
+  }
+});
+
+test("a matching receipt with missing message arguments fails open instead of showing an empty bubble", () => {
+  const display = createTerminalChatDisplay();
+  const restored = ownMessage("", "missing-args");
+  restored.args = undefined;
+  try {
+    assert.equal(display.enable(), true);
+    restored.updateResult(delivered("missing-args"));
+    assert.match(visible(restored).join("\n"), /unverified result/u);
+    assert.equal(display.isEnabled(), false);
+  } finally {
+    display.dispose();
+  }
+});
+
 test("pending custom tool renderers fail open so interaction prompts cannot be hidden", () => {
   const reasons: string[] = [];
   const display = createTerminalChatDisplay({ onFallback: (reason) => reasons.push(reason) });

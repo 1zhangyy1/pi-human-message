@@ -10,6 +10,8 @@
   <img src="https://raw.githubusercontent.com/1zhangyy1/pi-human-message/main/assets/human-message-readme-zh.gif" width="900" alt="Human Message：Pi 在后台完成任务，再用自然的消息回复">
 </a>
 
+*概念动画，非 Pi 终端录屏。消息渠道和日历能力由接入产品提供。*
+
 [![CI](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml/badge.svg)](https://github.com/1zhangyy1/pi-human-message/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/1zhangyy1/pi-human-message?color=202323)](https://github.com/1zhangyy1/pi-human-message/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-c9f5be)](LICENSE)

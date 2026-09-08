@@ -1,5 +1,19 @@
 # Evaluation
 
+## Unreleased hardening checks
+
+Checked on 2026-09-08 against Pi 0.85.1. `pnpm check` passes 103 tests, type checking, build, and package dry run.
+
+- Pi's real message replacement pipeline and native tool renderer cover later extensions adding/removing assistant text, restored foreign `send_message` results, missing arguments, and mismatched local receipts.
+- Real localhost HTTP servers verify direct delivery and rejection of both 307 and 308 redirects; redirected targets receive no request or message body.
+- Capped-turn tests cover identical-call replay, changed-text rejection, read-only durable receipt lookup, cancellation, failures, and reset. Default message count and length remain unlimited.
+- A separate credential-free Pi CLI profile starts in chat view; F8 switches to normal, `/reload` retains that choice, and `/human-message chat` re-enables chat. This checks startup and controls, not a real-model conversation.
+- A packed candidate installs in an independent TypeScript consumer with all four required Pi peers. Root JavaScript imports work. With TypeScript 5.9.3, full strict checking passes in `ESNext` / `Bundler` mode after adding the MCP SDK to the test fixture to satisfy an upstream Google GenAI type import. No extra MCP dependency is added to this package.
+
+Strict `NodeNext` declaration checking is **not** universally clean: Pi 0.85.1's upstream `pi-ai` declarations report JSON import-attribute errors even after the fixture provides MCP. The missing optional Coding Agent dependency in Human Message is corrected; these remaining upstream diagnostics are not claimed as fixed or hidden behind `skipLibCheck` in the independent check. The repository's own type check retains its existing configuration.
+
+No new real-model naturalness score, live channel delivery, or published release is claimed for this hardening candidate.
+
 `pi-human-message` evaluates visible chat behavior, not general intelligence. Every scenario starts a fresh Pi Agent session and records successful `send_message` deliveries plus non-message tool calls.
 
 ## Chat display verification

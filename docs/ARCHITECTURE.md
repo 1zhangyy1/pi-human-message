@@ -58,7 +58,7 @@ It reads two environment variables:
 
 Without a URL, the package registers `send_message` for Pi's interactive TUI. A successful tool result is rendered as one standalone terminal message. The pending tool call and receipt JSON render as empty rows; a failed result remains visible as an error. `/human-message` reports whether the mode is active.
 
-Terminal mode does not inject another assistant or custom message into the session. Pi already persists the tool call, its arguments, and its result, so the same renderer can reconstruct the message when a session is resumed. In released v0.4.0 and in normal view, ordinary Pi assistant text remains visible. The prompt tells the Agent not to repeat a reply it already sent.
+Terminal mode does not inject another assistant or custom message into the session. Pi already persists the tool call, its arguments, and its result, so the same renderer can reconstruct the message when a session is resumed. A local message requires a valid receipt matching that tool-call id; a historical tool with the same name is not proof of delivery. Foreign or unconfirmed results remain readable instead of becoming chat bubbles. In released v0.4.0 and in normal view, ordinary Pi assistant text remains visible. The prompt tells the Agent not to repeat a reply it already sent.
 
 The local port is enabled only after an interactive TUI session starts and only while this extension owns the registered `send_message` tool. Print, JSON, and RPC sessions remove it from the active tool set. If the user disabled the tool or another extension owns the same name, Human Message stays inactive rather than claiming a delivery it cannot present.
 
@@ -82,11 +82,13 @@ The historical v0.4.0 terminal examples do not demonstrate chat display; the v0.
 
 An IM product already knows the authenticated inbound conversation, so it should inject a JavaScript `SendMessagePort` directly. Pi's SDK accepts this factory through `DefaultResourceLoader.extensionFactories`. No HTTP hop or duplicated prompt is required. `bound_chat` remains the default delivery surface for this programmatic API, so existing embedded integrations keep their behavior.
 
+The root API includes both Agent-core helpers and the Pi extension factory, so its peer dependencies include Pi Coding Agent for public TypeScript declarations. Requiring that package does not start a CLI or another Agent runtime.
+
 ## Turn lifecycle
 
 ```text
 before_agent_start
-  1. reset the delivery counter for the new prompt
+  1. reset the delivery counter and receipt cache for the new prompt
   2. append the Human Message system contract
   3. add a hidden compact turn reminder after the current user prompt
 
@@ -102,7 +104,9 @@ host turn boundary
   10. if needed, run no more than one recovery prompt with the same durable turn identity
 ```
 
-Pi can produce several low-level model turns while resolving tool calls. There is no default message-count limit. The installable extension resets its delivery counter and injects the reminder for the active surface on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. Hosts that explicitly configure a cap can use `initialSentCount` to account for already committed messages on resume. A recovery review belongs to the same durable user turn, not a new task or an indefinite retry loop.
+Pi can produce several low-level model turns while resolving tool calls. There is no default message-count limit. The installable extension resets its delivery counter and injects the reminder for the active surface on `before_agent_start`; an embedded Agent-core host uses `withHumanMessageTurnReminder()` when it submits the user's prompt. A recovery review belongs to the same durable user turn, not a new task or an indefinite retry loop.
+
+The turn controller is sequential, like the Pi tool. It caches successful receipts so an identical call can replay even at an explicit cap; the same id with different text is rejected. Hosts resuming a capped turn supply `initialSentCount` and, to recover receipts no longer in memory, a read-only `lookupReceipt(request, signal)`. The lookup must match the bound conversation, tool-call id, and text, and return only an already committed receipt. At the cap, a missing or failed lookup never invokes the sender. Under the cap, durable deduplication stays with the sender. `reset()` starts a new local counter/cache, not a new host identity or permission to resend.
 
 ## Module responsibilities
 
@@ -128,7 +132,7 @@ The host returns a stable internal `messageId`, zero or more platform ids, and w
 
 In terminal mode, delivery is local and makes no network request. Its stable receipt is derived from the tool-call id. The renderer reveals the original text only after that receipt succeeds; it does not turn a pending or failed call into an apparent message.
 
-The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded URL credentials, invalid JSON, and invalid receipts fail closed. The bearer token is read only from environment configuration and is never returned in status output.
+The Webhook URL is trusted configuration, not model input. Remote HTTP, embedded URL credentials, redirects, invalid JSON, and invalid receipts fail closed. Configure the final Webhook URL directly, even if a redirect target would otherwise be allowed. The bearer token is read only from environment configuration and is never returned in status output.
 
 “Visible” depends on the selected surface. In a bound external chat, `send_message` is the Agent's delivered voice and plain assistant text remains host-side. In v0.4.0 and normal terminal view, both ordinary assistant text and confirmed `send_message` rows are visible. The v0.5.0 chat display hides ordinary Agent prose and tool activity but retains system and extension UI, with the safety fallbacks described above. Hidden terminal content remains in the session and is not private or deleted. Product hosts should render only the confirmed delivery stream to end users and keep operator traces separate.
 

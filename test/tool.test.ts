@@ -118,6 +118,104 @@ test("idempotent delivery replay does not consume another message slot", async (
   assert.deepEqual(delivered, ["replay", "new"]);
 });
 
+test("a confirmed call can replay at the cap without sending again", async () => {
+  let calls = 0;
+  const port = createTurnBoundSendMessagePort(async ({ toolCallId }) => {
+    calls += 1;
+    return { messageId: toolCallId, externalMessageIds: ["platform-1"], idempotentReplay: false };
+  }, { maxMessagesPerTurn: 1 });
+  const request = { toolCallId: "confirmed", text: "Done." };
+  const first = await port.send(request);
+  first.externalMessageIds.push("caller-mutation");
+  const replay = await port.send(request);
+  assert.deepEqual(replay, {
+    messageId: "confirmed", externalMessageIds: ["platform-1"], idempotentReplay: true,
+  });
+  assert.equal(port.sentCount, 1);
+  assert.equal(calls, 1);
+  await assert.rejects(port.send({ ...request, text: "Different message." }), /different text/u);
+  await assert.rejects(port.send({ toolCallId: "new", text: "Another one." }), /turn limit reached/u);
+  assert.equal(calls, 1);
+});
+
+test("a resumed full turn can look up a committed receipt without a new delivery", async () => {
+  let sends = 0;
+  const lookups: string[] = [];
+  const controller = new AbortController();
+  const port = createTurnBoundSendMessagePort(async ({ toolCallId }) => {
+    sends += 1;
+    return { messageId: toolCallId, externalMessageIds: [], idempotentReplay: false };
+  }, {
+    maxMessagesPerTurn: 1,
+    initialSentCount: 1,
+    lookupReceipt: async (request, signal) => {
+      assert.equal(signal, controller.signal);
+      lookups.push(request.toolCallId);
+      return request.toolCallId === "committed"
+        ? { messageId: "persisted-receipt", externalMessageIds: ["platform-1"], idempotentReplay: false }
+        : undefined;
+    },
+  });
+  const receipt = await port.send({ toolCallId: "committed", text: "Saved." }, controller.signal);
+  assert.equal(receipt.messageId, "persisted-receipt");
+  assert.equal(receipt.idempotentReplay, true);
+  await port.send({ toolCallId: "committed", text: "Saved." }, controller.signal);
+  await assert.rejects(
+    port.send({ toolCallId: "new", text: "Not saved." }, controller.signal), /turn limit reached/u,
+  );
+  assert.deepEqual(lookups, ["committed", "new"]);
+  assert.equal(port.sentCount, 1);
+  assert.equal(sends, 0);
+});
+
+test("receipt lookup failure never invokes the sender", async () => {
+  let sends = 0;
+  const port = createTurnBoundSendMessagePort(async ({ toolCallId }) => {
+    sends += 1;
+    return { messageId: toolCallId, externalMessageIds: [], idempotentReplay: false };
+  }, {
+    maxMessagesPerTurn: 1, initialSentCount: 1,
+    lookupReceipt: async () => { throw new Error("receipt store unavailable"); },
+  });
+  await assert.rejects(port.send({ toolCallId: "old", text: "Result" }), /receipt store unavailable/u);
+  assert.equal(sends, 0);
+  assert.equal(port.sentCount, 1);
+});
+
+test("reset starts a fresh receipt cache without charging late deliveries to the new turn", async () => {
+  let complete!: (value: { messageId: string; externalMessageIds: string[]; idempotentReplay: boolean }) => void;
+  let sends = 0;
+  const port = createTurnBoundSendMessagePort(async ({ toolCallId }) => {
+    sends += 1;
+    if (sends === 1) return new Promise((resolve) => { complete = resolve; });
+    return { messageId: toolCallId, externalMessageIds: [], idempotentReplay: false };
+  }, { maxMessagesPerTurn: 1 });
+  const request = { toolCallId: "old-turn", text: "Done" };
+  const pending = port.send(request);
+  port.reset();
+  complete({ messageId: "old-turn", externalMessageIds: [], idempotentReplay: false });
+  await pending;
+  assert.equal(port.sentCount, 0);
+  await port.send(request);
+  assert.equal(sends, 2);
+  assert.equal(port.sentCount, 1);
+});
+
+test("cancelled replay does not consult durable storage or return a receipt", async () => {
+  let lookups = 0;
+  const port = createTurnBoundSendMessagePort(async ({ toolCallId }) => ({
+    messageId: toolCallId, externalMessageIds: [], idempotentReplay: false,
+  }), {
+    maxMessagesPerTurn: 1,
+    lookupReceipt: async () => { lookups += 1; return undefined; },
+  });
+  await port.send({ toolCallId: "confirmed", text: "Done" });
+  const signal = AbortSignal.abort(new Error("cancelled"));
+  await assert.rejects(port.send({ toolCallId: "confirmed", text: "Done" }, signal), /cancelled/u);
+  await assert.rejects(port.send({ toolCallId: "new", text: "Another one" }, signal), /cancelled/u);
+  assert.equal(lookups, 0);
+});
+
 test("send_message rejects empty and over-limit bubbles before delivery", async () => {
   let calls = 0;
   const tool = createSendMessageAgentTool(async () => {

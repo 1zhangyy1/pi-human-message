@@ -77,11 +77,6 @@
     "@earendil-works/pi-coding-agent": "*",
     "@earendil-works/pi-tui": "*"
   },
-  "peerDependenciesMeta": {
-    "@earendil-works/pi-coding-agent": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@earendil-works/pi-agent-core": "0.85.1",
     "@earendil-works/pi-ai": "0.85.1",

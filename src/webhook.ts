@@ -22,7 +22,8 @@ export interface HumanMessageWebhookPayload {
  * Create the transport used by the installable Pi package.
  *
  * The URL is route-bound: the model never supplies a recipient, channel, or
- * conversation id. Plain HTTP is accepted only for local development.
+ * conversation id. Plain HTTP is accepted only for local development, and
+ * redirects are rejected so message bodies stay at the configured endpoint.
  */
 export function createWebhookSendMessagePort(
   options: WebhookSendMessageOptions,
@@ -50,6 +51,7 @@ export function createWebhookSendMessagePort(
 
     const response = await fetchImpl(endpoint, {
       method: "POST",
+      redirect: "error",
       headers,
       body: JSON.stringify(payload),
       ...(signal === undefined ? {} : { signal }),
