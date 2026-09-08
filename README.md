@@ -18,9 +18,14 @@
 
 Human Message gives the agent one `send_message` tool. One call is one message; the agent decides where a real conversational pause belongs.
 
-## A real Pi terminal run
+## In the Pi terminal
 
-This v0.4.0 transcript was reconstructed from a real run in Pi's original terminal view, not the new chat display. Pi read the README, then sent the two messages requested by the user:
+Chat view keeps the conversation focused on messages sent by the agent. Tool work stays in the session, and native confirmation dialogs remain visible. [See the real Pi 0.85.1 verification](docs/EVALUATION.md).
+
+<details>
+<summary>Earlier terminal example — v0.4.0</summary>
+
+This historical transcript was reconstructed from a real run in Pi's original terminal view, not v0.5.0 chat view. The installation command below belongs to that old recording; use the current instructions under Install. Pi read the README, then sent the two messages requested by the user:
 
 ```text
 you › Read README.md. I want to share this plugin with a friend. First send
@@ -38,28 +43,27 @@ Pi  └ Restart Pi, or run /reload in an open session. You will see the effect
 
 The recorded run used Pi 0.84.4 and GPT-5.6 Luna. The two replies were two real `send_message` calls, with no duplicate final answer, and they remained separate after session resume. The terminal layout was reconstructed from the session record; this English transcript translates the original Chinese task and replies. In another real run, one cohesive answer stayed as one message—the plugin does not split merely for effect. [See the verification record](docs/EVALUATION.md).
 
+</details>
+
 ## Install
 
-If you do not have [Pi](https://pi.dev/docs/latest) yet:
+Chat view is verified on **Pi 0.85.1**. To install that version of [Pi](https://pi.dev/docs/latest):
 
 ```bash
-npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent@0.85.1
 ```
 
 Then install Human Message:
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+pi install git:github.com/1zhangyy1/pi-human-message@v0.5.0
 ```
 
-Run `pi`. On first use, enter `/login` in Pi to choose a model provider. If Pi is already open, run `/reload` after installation. Use `/human-message` to confirm that delivery is active.
+Run `pi`, then `/login` to connect a model provider if needed. If Pi is already open, run `/reload`. Use `/human-message` or `/human-message status` to check the current view. Existing sessions with ordinary assistant replies or errors stay in normal view; use `/new` to start a fresh chat view.
 
-Use Pi 0.84.4 or newer. Human Message itself needs no Webhook, bot, or separate API key.
+On a compatible Pi 0.85.1 runtime, chat view starts by default: `send_message` replies appear immediately, while ordinary Agent prose and tool activity stay out of the conversation. Press **F8**, or use `/human-message chat` and `/human-message normal`, to switch views. Normal view keeps the message tool and restores the activity trace.
 
-> **Unreleased — chat display:** in development for Pi 0.85.1; the install command above still installs v0.4.0.
-> On a compatible runtime, chat display starts by default: `send_message` replies appear immediately, while ordinary Agent prose and tool activity stay out of the conversation.
-> Use `/human-message chat` or `/human-message normal`, or press **F8** to switch. `/human-message` and `/human-message status` show the current state.
-> Normal view keeps the message tool and restores the full activity trace. Errors, uncertain compatibility, or otherwise hidden answers restore normal view; system and extension UI remain available. [Compatibility details](docs/ARCHITECTURE.md#chat-display-unreleased).
+Other Pi versions or uncertain display compatibility fall back to normal view. Errors and otherwise hidden answers do too; system and extension UI remain available. Human Message needs no Webhook, bot, or separate API key. [Compatibility details](docs/ARCHITECTURE.md#chat-display).
 
 ## Add it to your product
 
@@ -71,7 +75,7 @@ To use Human Message in Telegram, WeChat, Feishu, or another product, connect it
 Your task → Pi does the work with tools → agent calls send_message → one or more natural messages appear
 ```
 
-It does not split finished prose by punctuation or character count, and it does not require a fixed number of messages. The released v0.4.0 keeps Pi's normal tool work and errors visible.
+It does not split finished prose by punctuation or character count, and it does not require a fixed number of messages. Chat view changes presentation, not tool execution or session history.
 
 ## Develop
 

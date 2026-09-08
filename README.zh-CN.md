@@ -20,7 +20,12 @@ Human Message 给 Agent 一个 `send_message` 工具。一次调用就是一条�
 
 ## 在真实 Pi 终端里
 
-下面是 v0.4.0 在 Pi 原生终端视图中的真实记录整理，不是新版聊天显示。Pi 先读取 README，再按用户要求发出两条消息：
+聊天视图把注意力留给 Agent 发出的消息。工具过程仍保存在会话中，需要确认时，Pi 原生弹窗照常出现。[查看 Pi 0.85.1 的真实验证](docs/EVALUATION.md)。
+
+<details>
+<summary>历史终端示例 — v0.4.0</summary>
+
+下面根据 v0.4.0 在 Pi 原生终端中的真实记录整理，不是 v0.5.0 聊天视图。其中的安装命令属于旧记录，请使用下方「安装」中的新版命令。Pi 先读取 README，再按用户要求发出两条消息：
 
 ```text
 你 › 请读一下 README.md。我要把这个插件发给朋友：请先单独发出
@@ -37,28 +42,27 @@ Pi └ 安装后重启 Pi，或在已打开的 Pi 里运行 /reload；在交互�
 
 这次实跑使用 Pi 0.84.4 和 GPT-5.6 Luna。两条回复来自两次真实的 `send_message` 调用，没有重复的最终回答；恢复会话后也仍然是两条消息。上面的终端样式根据 session 记录重排，用户任务和 Pi 回复保持原文。另一次只需要一个完整回答的实跑仅发送了一条，插件不会为了凑效果强行拆分。[查看验证记录](docs/EVALUATION.md)
 
+</details>
+
 ## 安装
 
-还没有 [Pi](https://pi.dev/docs/latest)：
+聊天视图已验证的版本是 **Pi 0.85.1**。安装这个版本的 [Pi](https://pi.dev/docs/latest)：
 
 ```bash
-npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent@0.85.1
 ```
 
 然后安装 Human Message：
 
 ```bash
-pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
+pi install git:github.com/1zhangyy1/pi-human-message@v0.5.0
 ```
 
-运行 `pi`。第一次使用可以在 Pi 中输入 `/login` 登录模型；如果 Pi 已经打开，安装后输入 `/reload`。再输入 `/human-message`，即可确认插件已经生效。
+运行 `pi`，首次使用时输入 `/login` 连接模型服务。如果 Pi 已经打开，先输入 `/reload`，再用 `/human-message` 或 `/human-message status` 查看当前视图。已有普通回复或错误的旧会话会保留普通视图；输入 `/new` 即可新开聊天视图。
 
-请使用 Pi 0.84.4 或更新版本。Human Message 本身不需要 Webhook、机器人或另一份 API Key。
+兼容的 Pi 0.85.1 环境默认开启聊天视图：`send_message` 回复即时显示，Agent 普通正文和工具过程不再混进对话。按 **F8**，或输入 `/human-message chat`、`/human-message normal` 切换；普通视图保留消息工具，并恢复完整过程。
 
-> **开发中，尚未发布：**新版聊天显示面向 Pi 0.85.1；上面的安装命令仍安装 v0.4.0。
-> 兼容时默认开启：`send_message` 回复即时显示，Agent 普通正文和工具过程不再混进对话。
-> 输入 `/human-message chat` 或 `/human-message normal`，也可按 **F8** 切换；`/human-message` 或 `/human-message status` 查看当前状态。
-> 普通视图保留消息工具，恢复完整过程。遇到错误、兼容性不确定或未发出的回答会回退普通视图；系统和扩展界面仍然保留。[兼容范围](docs/ARCHITECTURE.md#chat-display-unreleased)。
+其他 Pi 版本或显示兼容性不确定时，会回退普通视图；遇到错误或未发出的回答也一样。系统和扩展界面仍然保留。Human Message 本身不需要 Webhook、机器人或另一份 API Key。[兼容范围](docs/ARCHITECTURE.md#chat-display)。
 
 ## 接进自己的产品
 
@@ -70,7 +74,7 @@ pi install git:github.com/1zhangyy1/pi-human-message@v0.4.0
 你提出任务 → Pi 使用工具完成工作 → Agent 调用 send_message → 显示一条或几条自然消息
 ```
 
-它不会把生成好的长段落按标点或字数硬切开，也不要求固定发送几条。已发布的 v0.4.0 仍正常显示 Pi 原本的工具过程和错误。
+它不会把生成好的长段落按标点或字数硬切开，也不要求固定发送几条。聊天视图只改变显示，不改工具执行或会话记录。
 
 ## 开发
 
