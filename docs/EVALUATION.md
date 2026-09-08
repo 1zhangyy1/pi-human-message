@@ -1,6 +1,6 @@
 # Evaluation
 
-## Unreleased hardening checks
+## 0.5.1 hardening checks
 
 Checked on 2026-09-08 against Pi 0.85.1. `pnpm check` passes 103 tests, type checking, build, and package dry run.
 
@@ -12,7 +12,7 @@ Checked on 2026-09-08 against Pi 0.85.1. `pnpm check` passes 103 tests, type che
 
 Strict `NodeNext` declaration checking is **not** universally clean: Pi 0.85.1's upstream `pi-ai` declarations report JSON import-attribute errors even after the fixture provides MCP. The missing optional Coding Agent dependency in Human Message is corrected; these remaining upstream diagnostics are not claimed as fixed or hidden behind `skipLibCheck` in the independent check. The repository's own type check retains its existing configuration.
 
-No new real-model naturalness score, live channel delivery, or published release is claimed for this hardening candidate.
+These checks do not claim a new real-model naturalness score or live channel delivery for this patch.
 
 `pi-human-message` evaluates visible chat behavior, not general intelligence. Every scenario starts a fresh Pi Agent session and records successful `send_message` deliveries plus non-message tool calls.
 

@@ -2,7 +2,7 @@
 
 All notable changes are documented here. The project follows semantic versioning after the initial `0.1.0` release.
 
-## Unreleased
+## 0.5.1 - 2026-09-08
 
 - Verify local terminal receipts before rendering a confirmed message; preserve foreign and unconfirmed results in restored sessions.
 - Check the final persisted assistant messages at run completion, including changes made by later extensions, before keeping chat view enabled.
